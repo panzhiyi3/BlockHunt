@@ -28,12 +28,14 @@ import nl.Steffion.BlockHunt.Listeners.OnBlockBreakEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockPlaceEvent;
 import nl.Steffion.BlockHunt.Listeners.OnEntityDamageByEntityEvent;
 import nl.Steffion.BlockHunt.Listeners.OnEntityDamageEvent;
+import nl.Steffion.BlockHunt.Listeners.OnEntityShootBowEvent;
 import nl.Steffion.BlockHunt.Listeners.OnFoodLevelChangeEvent;
 import nl.Steffion.BlockHunt.Listeners.OnInventoryClickEvent;
 import nl.Steffion.BlockHunt.Listeners.OnInventoryCloseEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerCommandPreprocessEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerDropItemEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerInteractEvent;
+import nl.Steffion.BlockHunt.Listeners.OnPlayerJoinEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerMoveEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerQuitEvent;
 import nl.Steffion.BlockHunt.Listeners.OnSignChangeEvent;
@@ -46,6 +48,8 @@ import nl.Steffion.BlockHunt.mcstats.Metrics;
 import nl.Steffion.BlockHunt.mcstats.Metrics.Graph;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -60,6 +64,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -146,6 +151,11 @@ public class BlockHunt extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new OnPlayerQuitEvent(),
 				this);
 		getServer().getPluginManager().registerEvents(new OnSignChangeEvent(),
+				this);
+		
+		getServer().getPluginManager().registerEvents(new OnPlayerJoinEvent(),
+				this);
+		getServer().getPluginManager().registerEvents(new OnEntityShootBowEvent(),
 				this);
 
 		ConfigurationSerialization.registerClass(LocationSerializable.class,
@@ -246,6 +256,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 		setupEconomy();
 
 		ArenaHandler.loadArenas();
+		
+		Common.Init();
 
 		Bukkit.getScheduler().runTaskTimer(this, new Runnable() {
 
@@ -386,10 +398,19 @@ public class BlockHunt extends JavaPlugin implements Listener {
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-2");
-							} else if (arena.timer == 1) {
-								for (Player pl : arena.playersInArena) {
+							}
+							else if (arena.timer == 1)
+							{
+								for (Player pl : arena.playersInArena)
+								{
 									pl.playSound(pl.getLocation(),
 											Sound.ORB_PICKUP, 1, 2);
+
+									//Init the Nyan cooldown
+									if(arena.nyanCooldown != null)
+									{
+										arena.nyanCooldown.put(pl, (Integer) W.config.get(ConfigC.nyanCooldown));
+									}
 								}
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
@@ -511,13 +532,13 @@ public class BlockHunt extends JavaPlugin implements Listener {
 
 					for (Player player : arena.seekers) {
 						if (player.getInventory().getItem(0) == null
-								|| player.getInventory().getItem(0).getType() != Material.DIAMOND_SWORD) {
+								|| player.getInventory().getItem(0).getType() != Common.SeekerWeapon) {
 							player.getInventory().setItem(0,
-									new ItemStack(Material.DIAMOND_SWORD, 1));
+									new ItemStack(Common.SeekerWeapon, 1));
 							player.getInventory().setHelmet(
 									new ItemStack(Material.IRON_HELMET, 1));
 							player.getInventory().setChestplate(
-									new ItemStack(Material.IRON_CHESTPLATE, 1));
+									new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
 							player.getInventory().setLeggings(
 									new ItemStack(Material.IRON_LEGGINGS, 1));
 							player.getInventory().setBoots(
@@ -548,10 +569,35 @@ public class BlockHunt extends JavaPlugin implements Listener {
 										Material.WOOD_SWORD, 1);
 								sword.addUnsafeEnchantment(
 										Enchantment.KNOCKBACK, 1);
-								for (Player arenaPlayer : arena.playersInArena) {
-									if (!arena.seekers.contains(arenaPlayer)) {
+								ItemStack bow = new ItemStack(
+										Material.BOW, 1);
+								bow.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE,
+										(int) W.config.get(ConfigC.arrowDamageLevel));
+								ItemStack arrow = new ItemStack(
+										Material.ARROW, 
+										(int) W.config.get(ConfigC.arrowNumber));
+								ItemStack sugar = new ItemStack(
+										Material.SUGAR, 1);
+								ItemStack firework = new ItemStack(Material.FIREWORK, 5);
+								FireworkMeta fm = (FireworkMeta) firework.getItemMeta();
+								fm.addEffect(FireworkEffect.builder().flicker(true).trail(true).with(FireworkEffect.Type.BALL_LARGE).withColor(Color.YELLOW).build());
+								fm.setPower(3);
+								firework.setItemMeta(fm);
+								for (Player arenaPlayer : arena.playersInArena)
+								{
+									if (!arena.seekers.contains(arenaPlayer))
+									{
 										arenaPlayer.getInventory().addItem(
 												sword);
+										arenaPlayer.getInventory().addItem(
+												bow);
+										arenaPlayer.getInventory().addItem(
+												arrow);
+										arenaPlayer.getInventory().addItem(
+												sugar);
+										arenaPlayer.getInventory().addItem(
+												firework);
+										arenaPlayer.setFoodLevel(10);
 										MessageM.sendFMessage(arenaPlayer,
 												ConfigC.normal_ingameGivenSword);
 									}
@@ -605,28 +651,67 @@ public class BlockHunt extends JavaPlugin implements Listener {
 							return;
 						}
 
-						for (Player player : arena.playersInArena) {
-							if (!arena.seekers.contains(player)) {
+						for (Player player : arena.playersInArena)
+						{
+							//cooldown the Nyan
+							if(arena.nyanCooldown != null)
+							{
+								if(arena.nyanCooldown.containsKey(player))
+								{
+									int cd = arena.nyanCooldown.get(player);
+									cd--;
+									if(cd < 0)
+									{
+										cd = 0;
+									}
+									arena.nyanCooldown.put(player, cd);
+								}
+							}
+
+							//cooldown seeker's sword
+							if(arena.seekers.contains(player))
+							{
+								float exp = player.getExp();
+								exp += Common.SWORD_COOLDOWN_PER_SEC;
+								if(exp >= 1.0f)
+								{
+									exp = 0.9f;
+								}
+								player.setExp(exp);
+							}
+
+							if (!arena.seekers.contains(player))
+							{
 								Location pLoc = player.getLocation();
 								Location moveLoc = W.moveLoc.get(player);
 								ItemStack block = player.getInventory()
 										.getItem(8);
 
-								if (block == null) {
-									if (W.pBlock.get(player) != null) {
+								if (block == null)
+								{
+									if (W.pBlock.get(player) != null)
+									{
 										block = W.pBlock.get(player);
 										player.getInventory().setItem(8, block);
 										player.updateInventory();
 									}
+									else
+									{
+										MessageM.broadcastMessage("Init block error,please contact the author");
+									}
 								}
 
-								if (moveLoc != null) {
+								if (moveLoc != null)
+								{
 									if (moveLoc.getX() == pLoc.getX()
 											&& moveLoc.getY() == pLoc.getY()
-											&& moveLoc.getZ() == pLoc.getZ()) {
-										if (block.getAmount() > 1) {
+											&& moveLoc.getZ() == pLoc.getZ())
+									{
+										if (block.getAmount() > 1)
+										{
 											block.setAmount(block.getAmount() - 1);
-										} else {
+										} else
+										{
 											Block pBlock = player.getLocation()
 													.getBlock();
 											if (pBlock.getType().equals(
@@ -635,25 +720,31 @@ public class BlockHunt extends JavaPlugin implements Listener {
 															Material.WATER)
 													|| pBlock
 															.getType()
-															.equals(Material.STATIONARY_WATER)) {
+															.equals(Material.STATIONARY_WATER))
+											{
 												if (pBlock.getType().equals(
 														Material.WATER)
 														|| pBlock
 																.getType()
-																.equals(Material.STATIONARY_WATER)) {
+																.equals(Material.STATIONARY_WATER))
+												{
 													W.hiddenLocWater.put(
 															player, true);
-												} else {
+												} else
+												{
 													W.hiddenLocWater.put(
 															player, false);
 												}
 												if (DisguiseAPI
-														.isDisguised(player)) {
+														.isDisguised(player))
+												{
 													DisguiseAPI
 															.undisguiseToAll(player);
 													for (Player pl : Bukkit
-															.getOnlinePlayers()) {
-														if (!pl.equals(player)) {
+															.getOnlinePlayers())
+													{
+														if (!pl.equals(player))
+														{
 															pl.hidePlayer(player);
 															pl.sendBlockChange(
 																	pBlock.getLocation(),
@@ -671,7 +762,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 															1, 1);
 													W.hiddenLoc.put(player,
 															moveLoc);
-													if (block.getDurability() != 0) {
+													if (block.getDurability() != 0)
+													{
 														MessageM.sendFMessage(
 																player,
 																ConfigC.normal_ingameNowSolid,
@@ -687,7 +779,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 																				.toLowerCase()
 																		+ ":"
 																		+ block.getDurability());
-													} else {
+													} else
+													{
 														MessageM.sendFMessage(
 																player,
 																ConfigC.normal_ingameNowSolid,
@@ -704,8 +797,10 @@ public class BlockHunt extends JavaPlugin implements Listener {
 													}
 												}
 												for (Player pl : Bukkit
-														.getOnlinePlayers()) {
-													if (!pl.equals(player)) {
+														.getOnlinePlayers())
+												{
+													if (!pl.equals(player))
+													{
 														pl.hidePlayer(player);
 														pl.sendBlockChange(
 																pBlock.getLocation(),
@@ -714,15 +809,22 @@ public class BlockHunt extends JavaPlugin implements Listener {
 																		.getDurability());
 													}
 												}
-											} else {
+											} else
+											{
 												MessageM.sendFMessage(
 														player,
 														ConfigC.warning_ingameNoSolidPlace);
 											}
 										}
-									} else {
-										block.setAmount(5);
-										if (!DisguiseAPI.isDisguised(player)) {
+									}
+									else
+									{
+										if(block != null)
+										{
+											block.setAmount(5);
+										}
+										if (!DisguiseAPI.isDisguised(player))
+										{
 											SolidBlockHandler
 													.makePlayerUnsolid(player);
 										}

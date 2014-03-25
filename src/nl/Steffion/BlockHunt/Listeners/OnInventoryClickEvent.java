@@ -37,6 +37,7 @@ public class OnInventoryClickEvent implements Listener {
 		}
 
 		Inventory inv = event.getInventory();
+		
 		if (inv.getType().equals(InventoryType.CHEST)) {
 			if (inv.getName().contains("DisguiseBlocks")) {
 				if (event.getCurrentItem() != null) {
@@ -373,37 +374,37 @@ public class OnInventoryClickEvent implements Listener {
 								.contains("timeInLobbyUntilStart")) {
 							updownButton(player, item, arena,
 									ArenaType.timeInLobbyUntilStart,
-									arena.timeInLobbyUntilStart, 1000, 5, 1, 1);
+									arena.timeInLobbyUntilStart, 1000, 5, 5, 5);
 						} else if (item.getItemMeta().getDisplayName()
 								.contains("waitingTimeSeeker")) {
 							updownButton(player, item, arena,
 									ArenaType.waitingTimeSeeker,
-									arena.waitingTimeSeeker, 1000, 5, 1, 1);
+									arena.waitingTimeSeeker, 1000, 5, 5, 5);
 						} else if (item.getItemMeta().getDisplayName()
 								.contains("gameTime")) {
 							updownButton(player, item, arena,
 									ArenaType.gameTime, arena.gameTime, 1000,
-									5, 1, 1);
+									5, 10, 10);
 						} else if (item.getItemMeta().getDisplayName()
 								.contains("timeUntilHidersSword")) {
 							updownButton(player, item, arena,
 									ArenaType.timeUntilHidersSword,
-									arena.timeUntilHidersSword, 1000, 0, 1, 1);
+									arena.timeUntilHidersSword, 1000, 0, 5, 5);
 						} else if (item.getItemMeta().getDisplayName()
 								.contains("hidersTokenWin")) {
 							updownButton(player, item, arena,
 									ArenaType.hidersTokenWin,
-									arena.hidersTokenWin, 1000, 0, 1, 1);
+									arena.hidersTokenWin, 1000, 0, 10, 10);
 						} else if (item.getItemMeta().getDisplayName()
 								.contains("seekersTokenWin")) {
 							updownButton(player, item, arena,
 									ArenaType.seekersTokenWin,
-									arena.seekersTokenWin, 1000, 0, 1, 1);
+									arena.seekersTokenWin, 1000, 0, 10, 10);
 						} else if (item.getItemMeta().getDisplayName()
 								.contains("killTokens")) {
 							updownButton(player, item, arena,
 									ArenaType.killTokens, arena.killTokens,
-									1000, 0, 1, 1);
+									1000, 0, 10, 10);
 						}
 
 						save(arena);

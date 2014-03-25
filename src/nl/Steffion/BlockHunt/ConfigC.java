@@ -102,6 +102,14 @@ public enum ConfigC {
 
 	requireInventoryClearOnJoin (false, W.config),
 
+	nyanCooldown (6, W.config),
+	seekerWeaponOneHitCost (0.1, W.config),
+	seekerWeaponHitHiderCost (0.5, W.config),
+	seekerWeaponCooldownPerSec (0.03, W.config),
+	seekerWrongAttackDamage(4.0, W.config),
+	arrowDamageLevel (2, W.config),
+	arrowNumber (24, W.config),
+
 	log_enabledPlugin ("%TAG%N%name%&a&k + %N%version% is now Enabled. Made by %A%autors%%N.",
 			W.messages),
 	log_disabledPlugin ("%TAG%N%name%&c&k - %N%version% is now Disabled. Made by %A%autors%%N.",

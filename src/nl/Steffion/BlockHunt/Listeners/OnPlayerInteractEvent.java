@@ -3,6 +3,7 @@ package nl.Steffion.BlockHunt.Listeners;
 import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.ArenaHandler;
+import nl.Steffion.BlockHunt.Common;
 import nl.Steffion.BlockHunt.ConfigC;
 import nl.Steffion.BlockHunt.InventoryHandler;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
@@ -28,6 +29,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class OnPlayerInteractEvent implements Listener {
 
@@ -186,6 +189,99 @@ public class OnPlayerInteractEvent implements Listener {
 										Sound.HURT_FLESH, 1, 1);
 								SolidBlockHandler.makePlayerUnsolid(pl);
 							}
+						}
+					}
+				}
+			}
+		}
+
+		// Use the Nyan sugar
+		if (player!= null
+				&& player.getInventory().getItemInHand() != null
+				&& player.getInventory().getItemInHand().getType().equals(Material.SUGAR))
+		{
+			for (Arena arena : W.arenaList) {
+				if (arena.playersInArena.contains(player)
+						&& arena.gameState.equals(ArenaState.INGAME)) {
+					int cd = arena.nyanCooldown.get(player);
+					if(cd != 0)
+					{
+						MessageM.sendMessage(player, "You can use Nyan in " + cd + " second(s)");
+						continue;
+					}
+					arena.nyanCooldown.put(player, (Integer) W.config.get(ConfigC.nyanCooldown));
+
+					player.getWorld().playSound(player.getLocation(),
+							Sound.CAT_MEOW, 1, 1);
+					PotionEffect pe = new PotionEffect(PotionEffectType.REGENERATION, 120, 1);
+					player.addPotionEffect(pe);
+				}
+			}
+		}
+		
+		//Use fireworks
+		if (player!= null
+				&& player.getInventory().getItemInHand() != null
+				&& player.getInventory().getItemInHand().getType().equals(Material.FIREWORK))
+		{
+			if (event.getAction() == Action.RIGHT_CLICK_BLOCK
+					&& block.getType() != Material.AIR)
+			{
+				for (Arena arena : W.arenaList)
+				{
+					if (arena.playersInArena.contains(player)
+							&& arena.gameState.equals(ArenaState.INGAME))
+					{
+						PotionEffect pe = new PotionEffect(
+								PotionEffectType.SPEED, 60, 1);
+						player.addPotionEffect(pe);
+					}
+				}
+			}
+		}
+
+		// If attacking innocent block
+		if (player != null
+				&& event.getAction() == Action.LEFT_CLICK_BLOCK
+				&& player.getItemInHand() != null)
+		{
+			if (player.getItemInHand().getType() == Common.SeekerWeapon)
+			{
+				for (Arena arena : W.arenaList)
+				{
+					if (arena.playersInArena.contains(player)
+							&& arena.seekers.contains(player))
+					{
+						if(block instanceof Player)
+						{
+							Player hider = (Player) block;
+							if (arena.playersInArena.contains(hider)
+									&&!arena.seekers.contains(hider))
+							{
+								float exp = player.getExp();
+								exp -= Common.SWORD_HITHIDER_COST_EXP;
+								if(exp <= 0.0f)
+								{
+									exp = 0.0f;
+
+									player.damage((double) Common.WRONG_ATTACK_DAMAGE);
+								}
+								player.setExp(exp);
+
+								break;
+							}
+						}
+						else if(block.getType() != Material.AIR)
+						{
+							float exp = player.getExp();
+							exp -= Common.SWORD_ONEHIT_COST_EXP;
+							if(exp <= 0.0f)
+							{
+								exp = 0.0f;
+
+								player.damage((double) Common.WRONG_ATTACK_DAMAGE);
+							}
+							player.setExp(exp);
 						}
 					}
 				}
