@@ -6,6 +6,7 @@ import java.util.List;
 import me.libraryaddict.disguise.DisguiseAPI;
 import me.libraryaddict.disguise.disguisetypes.DisguiseType;
 import me.libraryaddict.disguise.disguisetypes.MiscDisguise;
+import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import net.milkbowl.vault.economy.Economy;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
@@ -338,60 +339,85 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				"version-" + BlockHunt.pdfFile.getVersion(), "autors-"
 						+ BlockHunt.pdfFile.getAuthors().get(0));
 
-		getServer().getScheduler().runTaskTimer(this, new Runnable() {
+		getServer().getScheduler().runTaskTimer(this, new Runnable()
+		{
 			@SuppressWarnings("deprecation")
 			@Override
-			public void run() {
-				for (Arena arena : W.arenaList) {
-					if (arena.gameState == ArenaState.WAITING) {
-						if (arena.playersInArena.size() >= arena.minPlayers) {
+			public void run()
+			{
+				for (Arena arena : W.arenaList)
+				{
+					if (arena.gameState == ArenaState.WAITING)
+					{
+						if (arena.playersInArena.size() >= arena.minPlayers)
+						{
 							arena.gameState = ArenaState.STARTING;
 							arena.timer = arena.timeInLobbyUntilStart;
 							ArenaHandler.sendFMessage(arena,
 									ConfigC.normal_lobbyArenaIsStarting, "1-"
 											+ arena.timeInLobbyUntilStart);
 						}
-					} else if (arena.gameState == ArenaState.STARTING) {
+					}
+					else if (arena.gameState == ArenaState.STARTING)
+					{
 						arena.timer = arena.timer - 1;
-						if (arena.timer > 0) {
-							if (arena.timer == 60) {
+						if (arena.timer > 0)
+						{
+							if (arena.timer == 60)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-60");
-							} else if (arena.timer == 30) {
+							}
+							else if (arena.timer == 30)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-30");
-							} else if (arena.timer == 10) {
+							}
+							else if (arena.timer == 10)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-10");
-							} else if (arena.timer == 5) {
-								for (Player pl : arena.playersInArena) {
+							}
+							else if (arena.timer == 5)
+							{
+								for (Player pl : arena.playersInArena)
+								{
 									pl.playSound(pl.getLocation(),
 											Sound.ORB_PICKUP, 1, 0);
 								}
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-5");
-							} else if (arena.timer == 4) {
-								for (Player pl : arena.playersInArena) {
+							}
+							else if (arena.timer == 4)
+							{
+								for (Player pl : arena.playersInArena)
+								{
 									pl.playSound(pl.getLocation(),
 											Sound.ORB_PICKUP, 1, 0);
 								}
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-4");
-							} else if (arena.timer == 3) {
-								for (Player pl : arena.playersInArena) {
+							}
+							else if (arena.timer == 3)
+							{
+								for (Player pl : arena.playersInArena)
+								{
 									pl.playSound(pl.getLocation(),
 											Sound.ORB_PICKUP, 1, 1);
 								}
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-3");
-							} else if (arena.timer == 2) {
-								for (Player pl : arena.playersInArena) {
+							}
+							else if (arena.timer == 2)
+							{
+								for (Player pl : arena.playersInArena)
+								{
 									pl.playSound(pl.getLocation(),
 											Sound.ORB_PICKUP, 1, 1);
 								}
@@ -406,37 +432,49 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									pl.playSound(pl.getLocation(),
 											Sound.ORB_PICKUP, 1, 2);
 
-									//Init the Nyan cooldown
-									if(arena.nyanCooldown != null)
+									// Init the Nyan cooldown
+									if (arena.nyanCooldown != null)
 									{
-										arena.nyanCooldown.put(pl, (Integer) W.config.get(ConfigC.nyanCooldown));
+										arena.nyanCooldown.put(
+												pl,
+												(Integer) W.config
+														.get(ConfigC.nyanCooldown));
 									}
 								}
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_lobbyArenaIsStarting,
 										"1-1");
 							}
-						} else {
+						}
+						else
+						{
 							arena.gameState = ArenaState.INGAME;
 							arena.timer = arena.gameTime;
 							ArenaHandler.sendFMessage(arena,
 									ConfigC.normal_lobbyArenaStarted, "secs-"
 											+ arena.waitingTimeSeeker);
 
-							for (int i = arena.amountSeekersOnStart; i > 0; i = i - 1) {
+							for (int i = arena.amountSeekersOnStart; i > 0; i = i - 1)
+							{
 								boolean loop = true;
 								Player seeker = arena.playersInArena
 										.get(W.random
 												.nextInt(arena.playersInArena
 														.size()));
 
-								for (Player playerCheck : arena.playersInArena) {
-									if (W.choosenSeeker.get(playerCheck) != null) {
-										if (W.choosenSeeker.get(playerCheck) == true) {
+								for (Player playerCheck : arena.playersInArena)
+								{
+									if (W.choosenSeeker.get(playerCheck) != null)
+									{
+										if (W.choosenSeeker.get(playerCheck) == true)
+										{
 											seeker = playerCheck;
 											W.choosenSeeker.remove(playerCheck);
-										} else {
-											if (seeker.equals(playerCheck)) {
+										}
+										else
+										{
+											if (seeker.equals(playerCheck))
+											{
 												i = i + 1;
 												loop = false;
 											}
@@ -444,8 +482,10 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									}
 								}
 
-								if (loop) {
-									if (!arena.seekers.contains(seeker)) {
+								if (loop)
+								{
+									if (!arena.seekers.contains(seeker))
+									{
 										ArenaHandler
 												.sendFMessage(
 														arena,
@@ -458,31 +498,48 @@ public class BlockHunt extends JavaPlugin implements Listener {
 										seeker.updateInventory();
 										W.seekertime.put(seeker,
 												arena.waitingTimeSeeker);
-									} else {
+									}
+									else
+									{
 										i = i + 1;
 									}
 								}
 							}
 
-							for (Player arenaPlayer : arena.playersInArena) {
-								if (!arena.seekers.contains(arenaPlayer)) {
+							for (Player arenaPlayer : arena.playersInArena)
+							{
+								if (!arena.seekers.contains(arenaPlayer))
+								{
 									arenaPlayer.getInventory().clear();
 									arenaPlayer.updateInventory();
 									ItemStack block = arena.disguiseBlocks.get(W.random
 											.nextInt(arena.disguiseBlocks
 													.size()));
 
-									if (W.choosenBlock.get(arenaPlayer) != null) {
+									if (W.choosenBlock.get(arenaPlayer) != null)
+									{
 										block = W.choosenBlock.get(arenaPlayer);
 										W.choosenBlock.remove(arenaPlayer);
 									}
 
-									MiscDisguise disguise = new MiscDisguise(
-											DisguiseType.FALLING_BLOCK, block
-													.getTypeId(), block
-													.getDurability());
-									DisguiseAPI.disguiseToAll(arenaPlayer,
-											disguise);
+									if (Common.IsMobDisguise(block))
+									{
+										MobDisguise mobDisguise = new MobDisguise(
+												Common.GetDisguiseType(block),
+												true,
+												true);
+										DisguiseAPI.disguiseToAll(arenaPlayer,
+												mobDisguise);
+									}
+									else
+									{
+										MiscDisguise disguise = new MiscDisguise(
+												DisguiseType.FALLING_BLOCK,
+												block.getTypeId(), block
+														.getDurability());
+										DisguiseAPI.disguiseToAll(arenaPlayer,
+												disguise);
+									}
 
 									arenaPlayer.teleport(arena.hidersWarp);
 
@@ -496,7 +553,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 											new ItemStack(block));
 									W.pBlock.put(arenaPlayer, block);
 
-									if (block.getDurability() != 0) {
+									if (block.getDurability() != 0)
+									{
 										MessageM.sendFMessage(
 												arenaPlayer,
 												ConfigC.normal_ingameBlock,
@@ -511,7 +569,9 @@ public class BlockHunt extends JavaPlugin implements Listener {
 																.toLowerCase()
 														+ ":"
 														+ block.getDurability());
-									} else {
+									}
+									else
+									{
 										MessageM.sendFMessage(
 												arenaPlayer,
 												ConfigC.normal_ingameBlock,
@@ -530,15 +590,18 @@ public class BlockHunt extends JavaPlugin implements Listener {
 						}
 					}
 
-					for (Player player : arena.seekers) {
+					for (Player player : arena.seekers)
+					{
 						if (player.getInventory().getItem(0) == null
-								|| player.getInventory().getItem(0).getType() != Common.SeekerWeapon) {
+								|| player.getInventory().getItem(0).getType() != Common.SeekerWeapon)
+						{
 							player.getInventory().setItem(0,
 									new ItemStack(Common.SeekerWeapon, 1));
 							player.getInventory().setHelmet(
 									new ItemStack(Material.IRON_HELMET, 1));
 							player.getInventory().setChestplate(
-									new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+									new ItemStack(Material.DIAMOND_CHESTPLATE,
+											1));
 							player.getInventory().setLeggings(
 									new ItemStack(Material.IRON_LEGGINGS, 1));
 							player.getInventory().setBoots(
@@ -547,10 +610,12 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									Sound.ANVIL_USE, 1, 1);
 						}
 
-						if (W.seekertime.get(player) != null) {
+						if (W.seekertime.get(player) != null)
+						{
 							W.seekertime.put(player,
 									W.seekertime.get(player) - 1);
-							if (W.seekertime.get(player) <= 0) {
+							if (W.seekertime.get(player) <= 0)
+							{
 								player.teleport(arena.hidersWarp);
 								W.seekertime.remove(player);
 								ArenaHandler.sendFMessage(arena,
@@ -560,27 +625,35 @@ public class BlockHunt extends JavaPlugin implements Listener {
 						}
 					}
 
-					if (arena.gameState == ArenaState.INGAME) {
+					if (arena.gameState == ArenaState.INGAME)
+					{
 						arena.timer = arena.timer - 1;
-						if (arena.timer > 0) {
+						if (arena.timer > 0)
+						{
 							if (arena.timer == arena.gameTime
-									- arena.timeUntilHidersSword) {
+									- arena.timeUntilHidersSword)
+							{
 								ItemStack sword = new ItemStack(
 										Material.WOOD_SWORD, 1);
 								sword.addUnsafeEnchantment(
 										Enchantment.KNOCKBACK, 1);
-								ItemStack bow = new ItemStack(
-										Material.BOW, 1);
-								bow.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE,
-										(int) W.config.get(ConfigC.arrowDamageLevel));
-								ItemStack arrow = new ItemStack(
-										Material.ARROW, 
+								ItemStack bow = new ItemStack(Material.BOW, 1);
+								bow.addUnsafeEnchantment(
+										Enchantment.ARROW_DAMAGE,
+										(int) W.config
+												.get(ConfigC.arrowDamageLevel));
+								ItemStack arrow = new ItemStack(Material.ARROW,
 										(int) W.config.get(ConfigC.arrowNumber));
-								ItemStack sugar = new ItemStack(
-										Material.SUGAR, 1);
-								ItemStack firework = new ItemStack(Material.FIREWORK, 5);
-								FireworkMeta fm = (FireworkMeta) firework.getItemMeta();
-								fm.addEffect(FireworkEffect.builder().flicker(true).trail(true).with(FireworkEffect.Type.BALL_LARGE).withColor(Color.YELLOW).build());
+								ItemStack sugar = new ItemStack(Material.SUGAR,
+										1);
+								ItemStack firework = new ItemStack(
+										Material.FIREWORK, 5);
+								FireworkMeta fm = (FireworkMeta) firework
+										.getItemMeta();
+								fm.addEffect(FireworkEffect.builder()
+										.flicker(true).trail(true)
+										.with(FireworkEffect.Type.BALL_LARGE)
+										.withColor(Color.YELLOW).build());
 								fm.setPower(3);
 								firework.setItemMeta(fm);
 								for (Player arenaPlayer : arena.playersInArena)
@@ -589,8 +662,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									{
 										arenaPlayer.getInventory().addItem(
 												sword);
-										arenaPlayer.getInventory().addItem(
-												bow);
+										arenaPlayer.getInventory().addItem(bow);
 										arenaPlayer.getInventory().addItem(
 												arrow);
 										arenaPlayer.getInventory().addItem(
@@ -603,64 +675,83 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									}
 								}
 							}
-							if (arena.timer == 190) {
+							if (arena.timer == 190)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-190");
-							} else if (arena.timer == 60) {
+							}
+							else if (arena.timer == 60)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-60");
-							} else if (arena.timer == 30) {
+							}
+							else if (arena.timer == 30)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-30");
-							} else if (arena.timer == 10) {
+							}
+							else if (arena.timer == 10)
+							{
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-10");
-							} else if (arena.timer == 5) {
+							}
+							else if (arena.timer == 5)
+							{
 								arena.lobbyWarp.getWorld()
 										.playSound(arena.lobbyWarp,
 												Sound.ORB_PICKUP, 1, 0);
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-5");
-							} else if (arena.timer == 4) {
+							}
+							else if (arena.timer == 4)
+							{
 								arena.lobbyWarp.getWorld()
 										.playSound(arena.lobbyWarp,
 												Sound.ORB_PICKUP, 1, 0);
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-4");
-							} else if (arena.timer == 3) {
+							}
+							else if (arena.timer == 3)
+							{
 								arena.lobbyWarp.getWorld()
 										.playSound(arena.lobbyWarp,
 												Sound.ORB_PICKUP, 1, 1);
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-3");
-							} else if (arena.timer == 2) {
+							}
+							else if (arena.timer == 2)
+							{
 								arena.lobbyWarp.getWorld()
 										.playSound(arena.lobbyWarp,
 												Sound.ORB_PICKUP, 1, 1);
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-2");
-							} else if (arena.timer == 1) {
+							}
+							else if (arena.timer == 1)
+							{
 								arena.lobbyWarp.getWorld()
 										.playSound(arena.lobbyWarp,
 												Sound.ORB_PICKUP, 1, 2);
 								ArenaHandler.sendFMessage(arena,
 										ConfigC.normal_ingameArenaEnd, "1-1");
 							}
-						} else {
+						}
+						else
+						{
 							ArenaHandler.hidersWin(arena);
 							return;
 						}
 
 						for (Player player : arena.playersInArena)
 						{
-							//cooldown the Nyan
-							if(arena.nyanCooldown != null)
+							// cooldown the Nyan
+							if (arena.nyanCooldown != null)
 							{
-								if(arena.nyanCooldown.containsKey(player))
+								if (arena.nyanCooldown.containsKey(player))
 								{
 									int cd = arena.nyanCooldown.get(player);
 									cd--;
-									if(cd < 0)
+									if (cd < 0)
 									{
 										cd = 0;
 									}
@@ -668,12 +759,12 @@ public class BlockHunt extends JavaPlugin implements Listener {
 								}
 							}
 
-							//cooldown seeker's sword
-							if(arena.seekers.contains(player))
+							// cooldown seeker's sword
+							if (arena.seekers.contains(player))
 							{
 								float exp = player.getExp();
 								exp += Common.SWORD_COOLDOWN_PER_SEC;
-								if(exp >= 1.0f)
+								if (exp >= 1.0f)
 								{
 									exp = 0.9f;
 								}
@@ -701,7 +792,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									}
 								}
 
-								if (moveLoc != null)
+								if (moveLoc != null
+										&& !Common.IsMobDisguise(block))
 								{
 									if (moveLoc.getX() == pLoc.getX()
 											&& moveLoc.getY() == pLoc.getY()
@@ -710,7 +802,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 										if (block.getAmount() > 1)
 										{
 											block.setAmount(block.getAmount() - 1);
-										} else
+										}
+										else
 										{
 											Block pBlock = player.getLocation()
 													.getBlock();
@@ -730,7 +823,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 												{
 													W.hiddenLocWater.put(
 															player, true);
-												} else
+												}
+												else
 												{
 													W.hiddenLocWater.put(
 															player, false);
@@ -779,7 +873,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 																				.toLowerCase()
 																		+ ":"
 																		+ block.getDurability());
-													} else
+													}
+													else
 													{
 														MessageM.sendFMessage(
 																player,
@@ -809,7 +904,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 																		.getDurability());
 													}
 												}
-											} else
+											}
+											else
 											{
 												MessageM.sendFMessage(
 														player,
@@ -819,7 +915,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									}
 									else
 									{
-										if(block != null)
+										if (block != null)
 										{
 											block.setAmount(5);
 										}
@@ -834,7 +930,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 						}
 					}
 
-					for (Player pl : arena.playersInArena) {
+					for (Player pl : arena.playersInArena)
+					{
 						pl.setLevel(arena.timer);
 						pl.setGameMode(GameMode.SURVIVAL);
 					}

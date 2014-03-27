@@ -20,47 +20,67 @@ public class OnEntityDamageByEntityEvent implements Listener {
 
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.NORMAL)
-	public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
+	public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event)
+	{
 		Player player = null;
-		if (event.getEntity() instanceof Player) {
+		if (event.getEntity() instanceof Player)
+		{
 			player = (Player) event.getEntity();
 		}
 
 		Player damager = null;
-		if (event.getDamager() instanceof Player) {
+		if (event.getDamager() instanceof Player)
+		{
 			damager = (Player) event.getDamager();
 		}
 
-		if (player != null) {
-			for (Arena arena : W.arenaList) {
-				if (arena.playersInArena.contains(player)) {
+		if (player != null)
+		{
+			for (Arena arena : W.arenaList)
+			{
+				if (arena.playersInArena.contains(player))
+				{
 					if (arena.gameState == ArenaState.WAITING
-							|| arena.gameState == ArenaState.STARTING) {
+							|| arena.gameState == ArenaState.STARTING)
+					{
 						event.setCancelled(true);
-					} else {
+					}
+					else
+					{
+						// seeker attacks seeker
 						if (arena.seekers.contains(player)
-								&& arena.seekers.contains(event.getDamager())) {
+								&& arena.seekers.contains(event.getDamager()))
+						{
 							event.setCancelled(true);
-						} else if (arena.playersInArena.contains(player)
+						}
+						// hider attacks hider
+						else if (arena.playersInArena.contains(player)
 								&& arena.playersInArena.contains(event
 										.getDamager())
 								&& !arena.seekers.contains(event.getDamager())
-								&& !arena.seekers.contains(player)) {
+								&& !arena.seekers.contains(player))
+						{
 							event.setCancelled(true);
-						} else {
+						}
+						else
+						{
 							player.getWorld().playSound(player.getLocation(),
 									Sound.HURT_FLESH, 1, 1);
 
-							if (event.getDamage() >= player.getHealth()) {
+							if (event.getDamage() >= player.getHealth())
+							{
 								player.setHealth(20);
 								event.setCancelled(true);
 
 								DisguiseAPI.undisguiseToAll(player);
 								W.pBlock.remove(player);
 
-								if (!arena.seekers.contains(player)) {
+								// hider die
+								if (!arena.seekers.contains(player))
+								{
 									if (W.shop.getFile().get(
-											damager.getName() + ".tokens") == null) {
+											damager.getName() + ".tokens") == null)
+									{
 										W.shop.getFile().set(
 												damager.getName() + ".tokens",
 												0);
@@ -79,7 +99,8 @@ public class OnEntityDamageByEntityEvent implements Listener {
 											"amount-" + arena.killTokens);
 
 									if (W.shop.getFile().get(
-											player.getName() + ".tokens") == null) {
+											player.getName() + ".tokens") == null)
+									{
 										W.shop.getFile()
 												.set(player.getName()
 														+ ".tokens", 0);
@@ -98,20 +119,26 @@ public class OnEntityDamageByEntityEvent implements Listener {
 											"amount-" + (int) addingTokens);
 
 									arena.seekers.add(player);
+									player.setFoodLevel(20);
 									ArenaHandler
 											.sendFMessage(
 													arena,
 													ConfigC.normal_ingameHiderDied,
 													"playername-"
 															+ player.getName(),
+													"killername-"
+															+ damager.getName(),
 													"left-"
 															+ (arena.playersInArena
 																	.size() - arena.seekers
 																	.size()));
-								} else {
+								}
+								else // seeker die
+								{
 									ArenaHandler.sendFMessage(arena,
 											ConfigC.normal_ingameSeekerDied,
 											"playername-" + player.getName(),
+											"killername-" + damager.getName(),
 											"secs-" + arena.waitingTimeSeeker);
 								}
 
@@ -119,9 +146,12 @@ public class OnEntityDamageByEntityEvent implements Listener {
 								player.updateInventory();
 
 								if (arena.seekers.size() >= arena.playersInArena
-										.size()) {
+										.size())
+								{
 									ArenaHandler.seekersWin(arena);
-								} else {
+								}
+								else
+								{
 									DisguiseAPI.undisguiseToAll(player);
 									W.seekertime.put(player,
 											arena.waitingTimeSeeker);

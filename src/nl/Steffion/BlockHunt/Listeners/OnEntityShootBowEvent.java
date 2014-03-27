@@ -3,7 +3,6 @@ package nl.Steffion.BlockHunt.Listeners;
 import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.W;
-import nl.Steffion.BlockHunt.Managers.MessageM;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Arrow;
