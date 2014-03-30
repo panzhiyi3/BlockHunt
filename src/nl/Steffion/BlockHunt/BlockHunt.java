@@ -3,10 +3,6 @@ package nl.Steffion.BlockHunt;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.libraryaddict.disguise.DisguiseAPI;
-import me.libraryaddict.disguise.disguisetypes.DisguiseType;
-import me.libraryaddict.disguise.disguisetypes.MiscDisguise;
-import me.libraryaddict.disguise.disguisetypes.MobDisguise;
 import net.milkbowl.vault.economy.Economy;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
@@ -238,9 +234,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				BlockHuntCMD, new CMDtokens(),
 				"/BlockHunt <tokens|t> <set|add|take> <playername> <amount>");
 
-		if (!getServer().getPluginManager().isPluginEnabled("LibsDisguises")) {
-			MessageM.broadcastFMessage(ConfigC.error_libsDisguisesNotInstalled);
-		}
+		DisguiseDelegate.GetSingleton().SetupDisguiseCraft(getServer());
 
 		if (!getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
 			MessageM.broadcastFMessage(ConfigC.error_protocolLibNotInstalled);
@@ -525,23 +519,29 @@ public class BlockHunt extends JavaPlugin implements Listener {
 										W.choosenBlock.remove(arenaPlayer);
 									}
 
-									if (Common.IsMobDisguise(block))
+									if (DisguiseDelegate.GetSingleton().IsMobDisguise(block))
 									{
-										MobDisguise mobDisguise = new MobDisguise(
-												Common.GetDisguiseType(block),
-												true,
-												true);
-										DisguiseAPI.disguiseToAll(arenaPlayer,
-												mobDisguise);
+//										MobDisguise mobDisguise = new MobDisguise(
+//												Common.GetDisguiseType(block),
+//												true,
+//												true);
+//										DisguiseAPI.disguiseToAll(arenaPlayer,
+//												mobDisguise);
+										DisguiseDelegate.GetSingleton().Disguise(arenaPlayer,
+												DisguiseDelegate.DISGUISE_TYPE.TYPE_MOB,
+												block);
 									}
 									else
 									{
-										MiscDisguise disguise = new MiscDisguise(
-												DisguiseType.FALLING_BLOCK,
-												block.getTypeId(), block
-														.getDurability());
-										DisguiseAPI.disguiseToAll(arenaPlayer,
-												disguise);
+//										MiscDisguise disguise = new MiscDisguise(
+//												DisguiseType.FALLING_BLOCK,
+//												block.getTypeId(), block
+//														.getDurability());
+//										DisguiseAPI.disguiseToAll(arenaPlayer,
+//												disguise);
+										DisguiseDelegate.GetSingleton().Disguise(arenaPlayer,
+												DisguiseDelegate.DISGUISE_TYPE.TYPE_FALLING_BLOCK,
+												block);
 									}
 
 									arenaPlayer.teleport(arena.hidersWarp);
@@ -801,7 +801,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 								}
 
 								if (moveLoc != null
-										&& !Common.IsMobDisguise(block))
+										&& !DisguiseDelegate.GetSingleton().IsMobDisguise(block))
 								{
 									if (moveLoc.getX() == pLoc.getX()
 											&& moveLoc.getY() == pLoc.getY()
@@ -837,11 +837,12 @@ public class BlockHunt extends JavaPlugin implements Listener {
 													W.hiddenLocWater.put(
 															player, false);
 												}
-												if (DisguiseAPI
-														.isDisguised(player))
+
+												//if (DisguiseAPI.isDisguised(player))
+												if (DisguiseDelegate.GetSingleton().IsDisguised(player))
 												{
-													DisguiseAPI
-															.undisguiseToAll(player);
+													//DisguiseAPI.undisguiseToAll(player);
+													DisguiseDelegate.GetSingleton().UnDisguise(player);
 													for (Player pl : Bukkit
 															.getOnlinePlayers())
 													{
@@ -927,7 +928,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 										{
 											block.setAmount(5);
 										}
-										if (!DisguiseAPI.isDisguised(player))
+										//if (!DisguiseAPI.isDisguised(player))
+										if (!DisguiseDelegate.GetSingleton().IsDisguised(player))
 										{
 											SolidBlockHandler
 													.makePlayerUnsolid(player);

@@ -3,7 +3,6 @@ package nl.Steffion.BlockHunt;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.libraryaddict.disguise.DisguiseAPI;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
 import nl.Steffion.BlockHunt.Managers.MessageM;
@@ -231,7 +230,8 @@ public class ArenaHandler {
 									}
 									player.updateInventory();
 
-									DisguiseAPI.undisguiseToAll(player);
+									//DisguiseAPI.undisguiseToAll(player);
+									DisguiseDelegate.GetSingleton().UnDisguise(player);
 
 									ArenaHandler.sendFMessage(arena,
 											ConfigC.normal_joinJoinedArena,
@@ -323,7 +323,10 @@ public class ArenaHandler {
 					ArenaHandler.sendFMessage(arena,
 							ConfigC.normal_ingameSeekerChoosen, "seeker-"
 									+ seeker.getName());
-					DisguiseAPI.undisguiseToAll(seeker);
+
+					//DisguiseAPI.undisguiseToAll(seeker);
+					DisguiseDelegate.GetSingleton().UnDisguise(seeker);
+
 					for (Player pl : Bukkit.getOnlinePlayers()) {
 						pl.showPlayer(seeker);
 					}
@@ -374,7 +377,8 @@ public class ArenaHandler {
 					}
 				}
 
-				DisguiseAPI.undisguiseToAll(player);
+				//DisguiseAPI.undisguiseToAll(player);
+				DisguiseDelegate.GetSingleton().UnDisguise(player);
 			}
 
 			ScoreboardHandler.removeScoreboard(player);

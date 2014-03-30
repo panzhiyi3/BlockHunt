@@ -1,11 +1,11 @@
 package nl.Steffion.BlockHunt.Listeners;
 
-import me.libraryaddict.disguise.DisguiseAPI;
 import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.ArenaHandler;
 import nl.Steffion.BlockHunt.Common;
 import nl.Steffion.BlockHunt.ConfigC;
+import nl.Steffion.BlockHunt.DisguiseDelegate;
 import nl.Steffion.BlockHunt.W;
 import nl.Steffion.BlockHunt.Managers.MessageM;
 
@@ -118,7 +118,8 @@ public class OnEntityDamageByEntityEvent implements Listener {
 								player.setHealth(20);
 								event.setCancelled(true);
 
-								DisguiseAPI.undisguiseToAll(player);
+								//DisguiseAPI.undisguiseToAll(player);
+								DisguiseDelegate.GetSingleton().UnDisguise(player);
 								W.pBlock.remove(player);
 
 								// hider die
@@ -198,7 +199,8 @@ public class OnEntityDamageByEntityEvent implements Listener {
 								}
 								else
 								{
-									DisguiseAPI.undisguiseToAll(player);
+									//DisguiseAPI.undisguiseToAll(player);
+									DisguiseDelegate.GetSingleton().UnDisguise(player);
 									W.seekertime.put(player,
 											arena.waitingTimeSeeker);
 									player.teleport(arena.seekersWarp);

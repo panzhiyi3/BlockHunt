@@ -224,6 +224,8 @@ public enum ConfigC {
 			W.messages),
 	error_libsDisguisesNotInstalled ("%TAG%EThe plugin '%ALib's Disguises%E' is required to run this plugin! Intall it or it won't work!",
 			W.messages),
+	error_disguisesPluginNotInstalled ("%TAG%EThe plugin '%ADisguisesCraft%E' or '%ALib's Disguise%E' is required to run this plugin! Intall it or it won't work!",
+			W.messages),
 	error_protocolLibNotInstalled ("%TAG%EThe plugin '%AProtocolLib%E' is required to run this plugin! Intall it or it won't work!",
 			W.messages),
 	error_noArena ("%TAG%ENo arena found with the name '%A%name%%E'.",

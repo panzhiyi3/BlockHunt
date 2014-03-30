@@ -4,8 +4,8 @@ import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaType;
 import nl.Steffion.BlockHunt.ArenaHandler;
 import nl.Steffion.BlockHunt.BlockHunt;
-import nl.Steffion.BlockHunt.Common;
 import nl.Steffion.BlockHunt.ConfigC;
+import nl.Steffion.BlockHunt.DisguiseDelegate;
 import nl.Steffion.BlockHunt.InventoryHandler;
 import nl.Steffion.BlockHunt.W;
 import nl.Steffion.BlockHunt.Managers.MessageM;
@@ -51,7 +51,7 @@ public class OnInventoryClickEvent implements Listener
 				if (event.getCurrentItem() != null)
 				{
 					//if (!event.getCurrentItem().getType().isBlock())
-					if (!Common.IsBlockOrModCanDisguise(event.getCurrentItem()))
+					if (!DisguiseDelegate.GetSingleton().IsBlockOrModCanDisguise(event.getCurrentItem()))
 					{
 						if (!event.getCurrentItem().getType()
 								.equals(Material.FLOWER_POT_ITEM))
@@ -256,7 +256,7 @@ public class OnInventoryClickEvent implements Listener
 					if (event.getCurrentItem().getType() != Material.AIR)
 					{
 						//if (event.getCurrentItem().getType().isBlock())
-						if (Common.IsBlockOrModCanDisguise(event.getCurrentItem()))
+						if (DisguiseDelegate.GetSingleton().IsBlockOrModCanDisguise(event.getCurrentItem()))
 						{
 							W.choosenBlock.put(player, event.getCurrentItem());
 							MessageM.sendFMessage(
