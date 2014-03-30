@@ -38,6 +38,7 @@ public class OnPlayerInteractEvent implements Listener {
 	public void onPlayerInteractEvent(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		Block block = event.getClickedBlock();
+
 		if (PermissionsM.hasPerm(player, Permissions.create, false)) {
 			ItemStack item = player.getItemInHand();
 			if (item.getType() != Material.AIR) {

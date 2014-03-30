@@ -29,6 +29,7 @@ import nl.Steffion.BlockHunt.Listeners.OnBlockBreakEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockPlaceEvent;
 import nl.Steffion.BlockHunt.Listeners.OnEntityDamageByEntityEvent;
 import nl.Steffion.BlockHunt.Listeners.OnEntityDamageEvent;
+import nl.Steffion.BlockHunt.Listeners.OnEntityDeathEvent;
 import nl.Steffion.BlockHunt.Listeners.OnEntityShootBowEvent;
 import nl.Steffion.BlockHunt.Listeners.OnFoodLevelChangeEvent;
 import nl.Steffion.BlockHunt.Listeners.OnInventoryClickEvent;
@@ -157,6 +158,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 		getServer().getPluginManager().registerEvents(new OnPlayerJoinEvent(),
 				this);
 		getServer().getPluginManager().registerEvents(new OnEntityShootBowEvent(),
+				this);
+		getServer().getPluginManager().registerEvents(new OnEntityDeathEvent(),
 				this);
 
 		ConfigurationSerialization.registerClass(LocationSerializable.class,
@@ -597,6 +600,11 @@ public class BlockHunt extends JavaPlugin implements Listener {
 						{
 							player.getInventory().setItem(0,
 									new ItemStack(Common.SeekerWeapon, 1));
+							player.getInventory().setItem(1,
+									new ItemStack(Material.BOW, 1));
+							player.getInventory().setItem(2,
+									new ItemStack(Material.ARROW,
+											(int) W.config.get(ConfigC.arrowNumber)));
 							player.getInventory().setHelmet(
 									new ItemStack(Material.IRON_HELMET, 1));
 							player.getInventory().setChestplate(

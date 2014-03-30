@@ -4,12 +4,14 @@ import me.libraryaddict.disguise.DisguiseAPI;
 import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.ArenaHandler;
+import nl.Steffion.BlockHunt.Common;
 import nl.Steffion.BlockHunt.ConfigC;
 import nl.Steffion.BlockHunt.W;
 import nl.Steffion.BlockHunt.Managers.MessageM;
 
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
+import org.bukkit.entity.Animals;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,6 +34,50 @@ public class OnEntityDamageByEntityEvent implements Listener {
 		if (event.getDamager() instanceof Player)
 		{
 			damager = (Player) event.getDamager();
+		}
+		
+		Animals animals = null;
+		if (event.getEntity() instanceof Animals)
+		{
+			animals = (Animals) event.getEntity();
+			event.setCancelled(true);
+			
+			if (damager != null)
+			{
+				for (Arena arena : W.arenaList)
+				{
+					if (arena.playersInArena.contains(damager)
+							&& arena.seekers.contains(damager))
+					{
+						float exp = damager.getExp();
+						exp -= Common.SWORD_HITHIDER_COST_EXP;
+						if (exp <= 0.0f)
+						{
+							exp = 0.0f;
+
+							// Attack innocence animals, get twice of damage
+							damager.damage((double) 2 * Common.WRONG_ATTACK_DAMAGE);
+						}
+						damager.setExp(exp);
+
+						break;
+					}
+				}
+			}
+		}
+
+		if (animals != null)
+		{
+			for (Arena arena : W.arenaList)
+			{
+				if (arena.playersInArena.contains(damager))
+				{
+					if (arena.gameState == ArenaState.INGAME)
+					{
+						event.setCancelled(true);
+					}
+				}
+			}
 		}
 
 		if (player != null)
