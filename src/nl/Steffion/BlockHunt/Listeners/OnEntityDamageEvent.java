@@ -11,17 +11,23 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
-public class OnEntityDamageEvent implements Listener {
-
+public class OnEntityDamageEvent implements Listener
+{
 	@EventHandler(priority = EventPriority.NORMAL)
-	public void onEntityDamageEvent(EntityDamageEvent event) {
+	public void onEntityDamageEvent(EntityDamageEvent event)
+	{
 		Entity ent = event.getEntity();
 
-		if (ent instanceof Player) {
+		if (ent instanceof Player)
+		{
 			Player player = (Player) event.getEntity();
-			for (Arena arena : W.arenaList) {
-				if (arena.playersInArena.contains(player)) {
-					if (!event.getCause().equals(DamageCause.ENTITY_ATTACK)) {
+			for (Arena arena : W.arenaList)
+			{
+				if (arena.playersInArena.contains(player))
+				{
+					if (!event.getCause().equals(DamageCause.ENTITY_ATTACK)
+							&& !event.getCause().equals(DamageCause.PROJECTILE))
+					{
 						event.setCancelled(true);
 					}
 				}

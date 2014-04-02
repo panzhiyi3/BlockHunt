@@ -1,8 +1,5 @@
 package nl.Steffion.BlockHunt;
 
-import nl.Steffion.BlockHunt.Managers.MessageM;
-
-import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +10,7 @@ public class DisguiseDelegate
 
 	WrapperInterface m_wrapper = null;
 	
-	final DELEGATE_WRAPPER m_wrapperType = DELEGATE_WRAPPER.WRAPPER_LIBSDISGUISE;
+	final DELEGATE_WRAPPER m_wrapperType = DELEGATE_WRAPPER.WRAPPER_DISGUISECRAFT;
 
 	public enum DELEGATE_WRAPPER
 	{

@@ -107,8 +107,10 @@ public enum ConfigC {
 	seekerWeaponHitHiderCost (0.5, W.config),
 	seekerWeaponCooldownPerSec (0.03, W.config),
 	seekerWrongAttackDamage(4.0, W.config),
-	arrowDamageLevel (2, W.config),
+	seekerWrongAttackAnimalDamage(4.0, W.config),
+	arrowDamageLevel (1, W.config),
 	arrowNumber (24, W.config),
+	seekerArrowNumber (8, W.config),
 
 	log_enabledPlugin ("%TAG%N%name%&a&k + %N%version% is now Enabled. Made by %A%autors%%N.",
 			W.messages),

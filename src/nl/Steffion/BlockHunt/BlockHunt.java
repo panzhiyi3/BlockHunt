@@ -153,8 +153,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 		
 		getServer().getPluginManager().registerEvents(new OnPlayerJoinEvent(),
 				this);
-		getServer().getPluginManager().registerEvents(new OnEntityShootBowEvent(),
-				this);
+		//getServer().getPluginManager().registerEvents(new OnEntityShootBowEvent(),
+		//		this);
 		getServer().getPluginManager().registerEvents(new OnEntityDeathEvent(),
 				this);
 
@@ -443,7 +443,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 										"1-1");
 							}
 						}
-						else
+						else // InGame
 						{
 							arena.gameState = ArenaState.INGAME;
 							arena.timer = arena.gameTime;
@@ -604,7 +604,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 									new ItemStack(Material.BOW, 1));
 							player.getInventory().setItem(2,
 									new ItemStack(Material.ARROW,
-											(int) W.config.get(ConfigC.arrowNumber)));
+											(int) W.config.get(ConfigC.seekerArrowNumber)));
 							player.getInventory().setHelmet(
 									new ItemStack(Material.IRON_HELMET, 1));
 							player.getInventory().setChestplate(
