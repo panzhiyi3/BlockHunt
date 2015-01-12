@@ -1,5 +1,8 @@
 package nl.Steffion.BlockHunt;
 
+import me.libraryaddict.disguise.DisguiseAPI;
+import me.libraryaddict.disguise.disguisetypes.DisguiseType;
+import me.libraryaddict.disguise.disguisetypes.MiscDisguise;
 import nl.Steffion.BlockHunt.Managers.MessageM;
 
 import org.bukkit.Bukkit;
@@ -47,12 +50,9 @@ public class SolidBlockHandler {
 			playerShow.showPlayer(player);
 		}
 
-//		MiscDisguise disguise = new MiscDisguise(DisguiseType.FALLING_BLOCK,
-//				block.getTypeId(), block.getDurability());
-//		DisguiseAPI.disguiseToAll(player, disguise);
-		DisguiseDelegate.GetSingleton().Disguise(player,
-				DisguiseDelegate.DISGUISE_TYPE.TYPE_FALLING_BLOCK,
-				block);
+		MiscDisguise disguise = new MiscDisguise(DisguiseType.FALLING_BLOCK,
+				block.getTypeId(), block.getDurability());
+		DisguiseAPI.disguiseToAll(player, disguise);
 
 		MessageM.sendFMessage(player, ConfigC.normal_ingameNoMoreSolid);
 	}

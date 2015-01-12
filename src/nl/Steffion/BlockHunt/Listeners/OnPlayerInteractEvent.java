@@ -3,7 +3,6 @@ package nl.Steffion.BlockHunt.Listeners;
 import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.ArenaHandler;
-import nl.Steffion.BlockHunt.Common;
 import nl.Steffion.BlockHunt.ConfigC;
 import nl.Steffion.BlockHunt.InventoryHandler;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
@@ -29,41 +28,29 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
-public class OnPlayerInteractEvent implements Listener
-{
+public class OnPlayerInteractEvent implements Listener {
 
 	@EventHandler(priority = EventPriority.NORMAL)
-	public void onPlayerInteractEvent(PlayerInteractEvent event)
-	{
+	public void onPlayerInteractEvent(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		Block block = event.getClickedBlock();
-
-		if (PermissionsM.hasPerm(player, Permissions.create, false))
-		{
+		if (PermissionsM.hasPerm(player, Permissions.create, false)) {
 			ItemStack item = player.getItemInHand();
-			if (item.getType() != Material.AIR)
-			{
-				if (item.getItemMeta().hasDisplayName())
-				{
+			if (item.getType() != Material.AIR) {
+				if (item.getItemMeta().hasDisplayName()) {
 					ItemMeta im = item.getItemMeta();
 					if (im.getDisplayName().equals(
 							MessageM.replaceAll((String) W.config
-									.get(ConfigC.wandName))))
-					{
+									.get(ConfigC.wandName)))) {
 						Action action = event.getAction();
-						if (event.hasBlock())
-						{
+						if (event.hasBlock()) {
 							LocationSerializable location = new LocationSerializable(
 									event.getClickedBlock().getLocation());
-							if (action.equals(Action.LEFT_CLICK_BLOCK))
-							{
+							if (action.equals(Action.LEFT_CLICK_BLOCK)) {
 								event.setCancelled(true);
 								if (W.pos1.get(player) == null
-										|| !W.pos1.get(player).equals(location))
-								{
+										|| !W.pos1.get(player).equals(location)) {
 									MessageM.sendFMessage(
 											player,
 											ConfigC.normal_wandSetPosition,
@@ -79,13 +66,10 @@ public class OnPlayerInteractEvent implements Listener
 											"z-" + location.getBlockZ());
 									W.pos1.put(player, location);
 								}
-							}
-							else if (action.equals(Action.RIGHT_CLICK_BLOCK))
-							{
+							} else if (action.equals(Action.RIGHT_CLICK_BLOCK)) {
 								event.setCancelled(true);
 								if (W.pos2.get(player) == null
-										|| !W.pos2.get(player).equals(location))
-								{
+										|| !W.pos2.get(player).equals(location)) {
 									MessageM.sendFMessage(
 											player,
 											ConfigC.normal_wandSetPosition,
@@ -108,59 +92,44 @@ public class OnPlayerInteractEvent implements Listener
 			}
 		}
 
-		if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
-		{
-			if (event.getClickedBlock() != null)
-			{
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			if (event.getClickedBlock() != null) {
 				if (event.getClickedBlock().getType()
 						.equals(Material.SIGN_POST)
 						|| event.getClickedBlock().getType()
-								.equals(Material.WALL_SIGN))
-				{
+								.equals(Material.WALL_SIGN)) {
 					if (SignsHandler.isSign(new LocationSerializable(event
-							.getClickedBlock().getLocation())))
-					{
+							.getClickedBlock().getLocation()))) {
 						Sign sign = (Sign) event.getClickedBlock().getState();
-						if (sign.getLine(1) != null)
-						{
+						if (sign.getLine(1) != null) {
 							if (sign.getLine(1)
 									.equals(MessageM
 											.replaceAll(W.config
 													.getFile()
 													.getStringList(
 															ConfigC.sign_LEAVE.location)
-													.get(1))))
-							{
+													.get(1)))) {
 								if (PermissionsM.hasPerm(player,
-										Permissions.joinsign, true))
-								{
+										Permissions.joinsign, true)) {
 									ArenaHandler.playerLeaveArena(player, true,
 											true);
 								}
-							}
-							else if (sign.getLine(1).equals(
+							} else if (sign.getLine(1).equals(
 									MessageM.replaceAll(W.config
 											.getFile()
 											.getStringList(
 													ConfigC.sign_SHOP.location)
-											.get(1))))
-							{
+											.get(1)))) {
 								if (PermissionsM.hasPerm(player,
-										Permissions.shop, true))
-								{
+										Permissions.shop, true)) {
 									InventoryHandler.openShop(player);
 								}
-							}
-							else
-							{
-								for (Arena arena : W.arenaList)
-								{
+							} else {
+								for (Arena arena : W.arenaList) {
 									if (sign.getLines()[1]
-											.contains(arena.arenaName))
-									{
+											.contains(arena.arenaName)) {
 										if (PermissionsM.hasPerm(player,
-												Permissions.joinsign, true))
-										{
+												Permissions.joinsign, true)) {
 											ArenaHandler.playerJoinArena(
 													player, arena.arenaName);
 										}
@@ -174,10 +143,8 @@ public class OnPlayerInteractEvent implements Listener
 		}
 
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK
-				|| event.getAction() == Action.LEFT_CLICK_BLOCK)
-		{
-			if (event.getClickedBlock().getType() != Material.AIR)
-			{
+				|| event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (event.getClickedBlock().getType() != Material.AIR) {
 				if (event.getClickedBlock().getType()
 						.equals(Material.ENCHANTMENT_TABLE)
 						|| event.getClickedBlock().getType()
@@ -192,12 +159,9 @@ public class OnPlayerInteractEvent implements Listener
 								.equals(Material.ENDER_CHEST)
 						|| event.getClickedBlock().getType()
 								.equals(Material.JUKEBOX)
-						|| block.getFace(block).equals(Material.FIRE))
-				{
-					for (Arena arena : W.arenaList)
-					{
-						if (arena.playersInArena.contains(player))
-						{
+						|| block.getFace(block).equals(Material.FIRE)) {
+					for (Arena arena : W.arenaList) {
+						if (arena.playersInArena.contains(player)) {
 							event.setCancelled(true);
 						}
 					}
@@ -206,22 +170,16 @@ public class OnPlayerInteractEvent implements Listener
 		}
 
 		if (event.getAction() == Action.LEFT_CLICK_BLOCK
-				|| event.getAction() == Action.LEFT_CLICK_BLOCK)
-		{
-			for (Arena arena : W.arenaList)
-			{
-				if (arena.seekers.contains(player))
-				{
-					for (Player pl : arena.playersInArena)
-					{
-						if (W.hiddenLoc.get(pl) != null)
-						{
+				|| event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			for (Arena arena : W.arenaList) {
+				if (arena.seekers.contains(player)) {
+					for (Player pl : arena.playersInArena) {
+						if (W.hiddenLoc.get(pl) != null) {
 							Block pLoc = event.getClickedBlock();
 							Block moveLocBlock = W.hiddenLoc.get(pl).getBlock();
 							if (moveLocBlock.getX() == pLoc.getX()
 									&& moveLocBlock.getY() == pLoc.getY()
-									&& moveLocBlock.getZ() == pLoc.getZ())
-							{
+									&& moveLocBlock.getZ() == pLoc.getZ()) {
 								W.moveLoc.put(pl, new Location(pl.getWorld(),
 										0, 0, 0));
 								pl.getWorld().playSound(player.getLocation(),
@@ -234,122 +192,18 @@ public class OnPlayerInteractEvent implements Listener
 			}
 		}
 
-		// Use the Nyan sugar
-		if (player != null
-				&& player.getInventory().getItemInHand() != null
-				&& player.getInventory().getItemInHand().getType()
-						.equals(Material.SUGAR))
-		{
-			for (Arena arena : W.arenaList)
-			{
-				if (arena.playersInArena.contains(player)
-						&& arena.gameState.equals(ArenaState.INGAME))
-				{
-					int cd = arena.nyanCooldown.get(player);
-					if (cd != 0)
-					{
-						MessageM.sendMessage(player, "You can use Nyan in "
-								+ cd + " second(s)");
-						continue;
-					}
-					arena.nyanCooldown.put(player,
-							(Integer) W.config.get(ConfigC.nyanCooldown));
-
-					player.getWorld().playSound(player.getLocation(),
-							Sound.CAT_MEOW, 1, 1);
-					PotionEffect pe = new PotionEffect(
-							PotionEffectType.REGENERATION, 120, 1);
-					player.addPotionEffect(pe);
-				}
-			}
-		}
-
-		// Use fireworks
-		if (player != null
-				&& player.getInventory().getItemInHand() != null
-				&& player.getInventory().getItemInHand().getType()
-						.equals(Material.FIREWORK))
-		{
-			if (event.getAction() == Action.RIGHT_CLICK_BLOCK
-					&& block.getType() != Material.AIR)
-			{
-				for (Arena arena : W.arenaList)
-				{
-					if (arena.playersInArena.contains(player)
-							&& arena.gameState.equals(ArenaState.INGAME))
-					{
-						PotionEffect pe = new PotionEffect(
-								PotionEffectType.SPEED, 60, 1);
-						player.addPotionEffect(pe);
-					}
-				}
-			}
-		}
-
-		// If attacking innocent block
-		if (player != null && event.getAction() == Action.LEFT_CLICK_BLOCK
-				&& player.getItemInHand() != null)
-		{
-			if (player.getItemInHand().getType() == Common.SeekerWeapon)
-			{
-				for (Arena arena : W.arenaList)
-				{
-					if (arena.playersInArena.contains(player)
-							&& arena.seekers.contains(player))
-					{
-						if (block instanceof Player)
-						{
-							Player hider = (Player) block;
-							if (arena.playersInArena.contains(hider)
-									&& !arena.seekers.contains(hider))
-							{
-								float exp = player.getExp();
-								exp -= Common.SWORD_HITHIDER_COST_EXP;
-								if (exp <= 0.0f)
-								{
-									exp = 0.0f;
-
-									player.damage((double) Common.WRONG_ATTACK_DAMAGE);
-								}
-								player.setExp(exp);
-
-								break;
-							}
-						}
-						else if (block.getType() != Material.AIR)
-						{
-							float exp = player.getExp();
-							exp -= Common.SWORD_ONEHIT_COST_EXP;
-							if (exp <= 0.0f)
-							{
-								exp = 0.0f;
-
-								player.damage((double) Common.WRONG_ATTACK_DAMAGE);
-							}
-							player.setExp(exp);
-						}
-					}
-				}
-			}
-		}
-
-		for (Arena arena : W.arenaList)
-		{
+		for (Arena arena : W.arenaList) {
 			if (arena.playersInArena.contains(player)
 					&& (arena.gameState.equals(ArenaState.WAITING) || arena.gameState
-							.equals(ArenaState.STARTING)))
-			{
+							.equals(ArenaState.STARTING))) {
 				event.setCancelled(true);
 				ItemStack item = player.getInventory().getItemInHand();
-				if (item.getType() != Material.AIR)
-				{
-					if (item.getItemMeta().getDisplayName() != null)
-					{
+				if (item.getType() != Material.AIR) {
+					if (item.getItemMeta().getDisplayName() != null) {
 						if (item.getItemMeta()
 								.getDisplayName()
 								.equals(MessageM.replaceAll((String) W.config
-										.get(ConfigC.shop_blockChooserv1Name))))
-						{
+										.get(ConfigC.shop_blockChooserv1Name)))) {
 							Inventory blockChooser = Bukkit
 									.createInventory(
 											null,
@@ -357,10 +211,8 @@ public class OnPlayerInteractEvent implements Listener
 											MessageM.replaceAll("\u00A7r"
 													+ W.config
 															.get(ConfigC.shop_blockChooserv1Name)));
-							if (arena.disguiseBlocks != null)
-							{
-								for (int i = arena.disguiseBlocks.size(); i > 0; i = i - 1)
-								{
+							if (arena.disguiseBlocks != null) {
+								for (int i = arena.disguiseBlocks.size(); i > 0; i = i - 1) {
 									blockChooser.setItem(i - 1,
 											arena.disguiseBlocks.get(i - 1));
 								}
@@ -372,8 +224,7 @@ public class OnPlayerInteractEvent implements Listener
 						if (item.getItemMeta()
 								.getDisplayName()
 								.equals(MessageM.replaceAll((String) W.config
-										.get(ConfigC.shop_BlockHuntPassv2Name))))
-						{
+										.get(ConfigC.shop_BlockHuntPassv2Name)))) {
 							Inventory BlockHuntPass = Bukkit
 									.createInventory(
 											null,

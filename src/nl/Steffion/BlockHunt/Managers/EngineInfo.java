@@ -14,5 +14,5 @@ public class EngineInfo {
 	 */
 
 	public static String engineVersion = "3.0.2";
-	public static String engineAuthors = "Steffion, Modified by AeroRider";
+	public static String engineAuthors = "Steffion";
 }

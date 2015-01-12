@@ -45,8 +45,6 @@ public class Arena implements ConfigurationSerializable {
 	public List<Player> seekers;
 	public Scoreboard scoreboard;
 
-	public Map<Player, Integer> nyanCooldown = new HashMap<Player, Integer>();
-
 	public Arena (String arenaName, LocationSerializable pos1,
 			LocationSerializable pos2, int maxPlayers, int minPlayers,
 			int amountSeekersOnStart, int timeInLobbyUntilStart,
