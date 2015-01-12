@@ -3,7 +3,6 @@ package nl.Steffion.BlockHunt;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.libraryaddict.disguise.DisguiseAPI;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
 import nl.Steffion.BlockHunt.Managers.MessageM;
@@ -231,7 +230,8 @@ public class ArenaHandler {
 									}
 									player.updateInventory();
 
-									DisguiseAPI.undisguiseToAll(player);
+									//DisguiseAPI.undisguiseToAll(player);
+									DisguiseDelegate.GetSingleton().UnDisguise(player);
 
 									ArenaHandler.sendFMessage(arena,
 											ConfigC.normal_joinJoinedArena,
@@ -323,7 +323,10 @@ public class ArenaHandler {
 					ArenaHandler.sendFMessage(arena,
 							ConfigC.normal_ingameSeekerChoosen, "seeker-"
 									+ seeker.getName());
-					DisguiseAPI.undisguiseToAll(seeker);
+
+					//DisguiseAPI.undisguiseToAll(seeker);
+					DisguiseDelegate.GetSingleton().UnDisguise(seeker);
+
 					for (Player pl : Bukkit.getOnlinePlayers()) {
 						pl.showPlayer(seeker);
 					}
@@ -374,7 +377,8 @@ public class ArenaHandler {
 					}
 				}
 
-				DisguiseAPI.undisguiseToAll(player);
+				//DisguiseAPI.undisguiseToAll(player);
+				DisguiseDelegate.GetSingleton().UnDisguise(player);
 			}
 
 			ScoreboardHandler.removeScoreboard(player);
@@ -396,24 +400,103 @@ public class ArenaHandler {
 		SignsHandler.updateSigns();
 	}
 
-	public static void seekersWin(Arena arena) {
+	public static void showTopKillerScore(Arena arena)
+	{
+		if( arena != null & arena.killScore != null )
+		{
+			MessageM.broadcastMessage("Top Killers:");
+			int maxScore = 0;
+			Player maxKiller = null;
+			for( Player pl : arena.playersInArena)
+			{
+				if(!arena.killScore.containsKey(pl))
+					continue;
+				int score = arena.killScore.get(pl);
+				if(score > maxScore)
+				{
+					maxScore = score;
+					maxKiller = pl;
+				}
+			}
+			if(maxScore == 0 || maxKiller == null)
+			{
+				return;
+			}
+			arena.killScore.remove(maxKiller);
+			MessageM.broadcastMessage("1st: " + maxKiller.getName()
+					+ " killed " + maxScore + " players!");
+			
+			maxScore = 0;
+			maxKiller = null;
+			for( Player pl : arena.playersInArena)
+			{
+				if(!arena.killScore.containsKey(pl))
+					continue;
+				int score = arena.killScore.get(pl);
+				if(score > maxScore)
+				{
+					maxScore = score;
+					maxKiller = pl;
+				}
+			}
+			if(maxScore == 0 || maxKiller == null)
+			{
+				return;
+			}
+			arena.killScore.remove(maxKiller);
+			MessageM.broadcastMessage("2nd: " + maxKiller.getName()
+					+ " killed " + maxScore + " players!");
+			
+			maxScore = 0;
+			maxKiller = null;
+			for( Player pl : arena.playersInArena)
+			{
+				if(!arena.killScore.containsKey(pl))
+					continue;
+				int score = arena.killScore.get(pl);
+				if(score > maxScore)
+				{
+					maxScore = score;
+					maxKiller = pl;
+				}
+			}
+			if(maxScore == 0 || maxKiller == null)
+			{
+				return;
+			}
+			//arena.killScore.remove(maxKiller);
+			MessageM.broadcastMessage("3rd: " + maxKiller.getName()
+					+ " killed " + maxScore + " players!");
+		}
+	}
+	
+	public static void seekersWin(Arena arena)
+	{
 		ArenaHandler.sendFMessage(arena, ConfigC.normal_winSeekers);
-		for (Player player : arena.playersInArena) {
-			if (arena.seekersWinCommands != null) {
-				for (String command : arena.seekersWinCommands) {
+		for (Player player : arena.playersInArena)
+		{
+			if (arena.seekersWinCommands != null)
+			{
+				for (String command : arena.seekersWinCommands)
+				{
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
 							command.replaceAll("%player%", player.getName()));
 				}
-				if (W.config.getFile().getBoolean("vaultSupport") == true) {
-					if (BlockHunt.econ != null) {
+				if (W.config.getFile().getBoolean("vaultSupport") == true)
+				{
+					if (BlockHunt.econ != null)
+					{
 						BlockHunt.econ.depositPlayer(player.getName(),
 								arena.seekersTokenWin);
 						MessageM.sendFMessage(player,
 								ConfigC.normal_addedVaultBalance, "amount-"
 										+ arena.seekersTokenWin);
 					}
-				} else {
-					if (W.shop.getFile().get(player.getName() + ".tokens") == null) {
+				}
+				else
+				{
+					if (W.shop.getFile().get(player.getName() + ".tokens") == null)
+					{
 						W.shop.getFile().set(player.getName() + ".tokens", 0);
 						W.shop.save();
 					}
@@ -431,29 +514,44 @@ public class ArenaHandler {
 
 		arena.seekers.clear();
 
-		for (Player player : arena.playersInArena) {
+		for (Player player : arena.playersInArena)
+		{
 			playerLeaveArena(player, false, false);
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 		}
 
+		showTopKillerScore(arena);
+		
 		arena.gameState = ArenaState.WAITING;
 		arena.timer = 0;
 		arena.playersInArena.clear();
+		if(arena.killScore != null)
+		{
+			arena.killScore.clear();
+		}
 	}
 
-	public static void hidersWin(Arena arena) {
+	public static void hidersWin(Arena arena)
+	{
 		ArenaHandler.sendFMessage(arena, ConfigC.normal_winHiders);
-		for (Player player : arena.playersInArena) {
-			if (arena.seekers.contains(player)) {
-				if (arena.hidersWinCommands != null) {
-					for (String command : arena.hidersWinCommands) {
+		for (Player player : arena.playersInArena)
+		{
+			if (arena.seekers.contains(player))
+			{
+				if (arena.hidersWinCommands != null)
+				{
+					for (String command : arena.hidersWinCommands)
+					{
 						Bukkit.dispatchCommand(
 								Bukkit.getConsoleSender(),
 								command.replaceAll("%player%", player.getName()));
 					}
-					if (W.config.getFile().getBoolean("vaultSupport") == true) {
-						if (BlockHunt.econ != null) {
-							if (arena.seekers.contains(player)) {
+					if (W.config.getFile().getBoolean("vaultSupport") == true)
+					{
+						if (BlockHunt.econ != null)
+						{
+							if (arena.seekers.contains(player))
+							{
 								BlockHunt.econ.depositPlayer(player.getName(),
 										arena.hidersTokenWin);
 								MessageM.sendFMessage(player,
@@ -461,8 +559,11 @@ public class ArenaHandler {
 										"amount-" + arena.hidersTokenWin);
 							}
 						}
-					} else {
-						if (W.shop.getFile().get(player.getName() + ".tokens") == null) {
+					}
+					else
+					{
+						if (W.shop.getFile().get(player.getName() + ".tokens") == null)
+						{
 							W.shop.getFile().set(player.getName() + ".tokens",
 									0);
 							W.shop.save();
@@ -483,14 +584,21 @@ public class ArenaHandler {
 
 		arena.seekers.clear();
 
-		for (Player player : arena.playersInArena) {
+		for (Player player : arena.playersInArena)
+		{
 			playerLeaveArena(player, false, false);
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 		}
 
+		showTopKillerScore(arena);
+
 		arena.gameState = ArenaState.WAITING;
 		arena.timer = 0;
 		arena.playersInArena.clear();
+		if(arena.killScore != null)
+		{
+			arena.killScore.clear();
+		}
 	}
 
 	public static void stopArena(Arena arena) {

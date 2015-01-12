@@ -15,18 +15,23 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class InventoryHandler {
+public class InventoryHandler
+{
 
-	public static void openPanel(Player player, String arenaname) {
+	public static void openPanel(Player player, String arenaname)
+	{
 
 		Arena arena = null;
-		for (Arena arena2 : W.arenaList) {
-			if (arena2.arenaName.equalsIgnoreCase(arenaname)) {
+		for (Arena arena2 : W.arenaList)
+		{
+			if (arena2.arenaName.equalsIgnoreCase(arenaname))
+			{
 				arena = arena2;
 			}
 		}
 
-		if (arena != null) {
+		if (arena != null)
+		{
 			String shorten = arena.arenaName;
 			arenaname = arena.arenaName;
 			if (shorten.length() > 6)
@@ -127,20 +132,20 @@ public class InventoryHandler {
 					amountSeekersOnStart, amountSeekersOnStart_DOWN, 4, 13, 22);
 
 			updownButton(panel, arena, ArenaType.timeInLobbyUntilStart,
-					"timeInLobbyUntilStart", "1 %Nsecond",
+					"timeInLobbyUntilStart", "5 %Nsecond",
 					timeInLobbyUntilStart_UP, timeInLobbyUntilStart,
 					timeInLobbyUntilStart_DOWN, 6, 15, 24);
 
 			updownButton(panel, arena, ArenaType.waitingTimeSeeker,
-					"waitingTimeSeeker", "1 %Nsecond", waitingTimeSeeker_UP,
+					"waitingTimeSeeker", "5 %Nsecond", waitingTimeSeeker_UP,
 					waitingTimeSeeker, waitingTimeSeeker_DOWN, 7, 16, 25);
 
 			updownButton(panel, arena, ArenaType.gameTime, "gameTime",
-					"1 %Nsecond", gameTime_UP, gameTime, gameTime_DOWN, 8, 17,
+					"10 %Nsecond", gameTime_UP, gameTime, gameTime_DOWN, 8, 17,
 					26);
 
 			updownButton(panel, arena, ArenaType.timeUntilHidersSword,
-					"timeUntilHidersSword", "1 %Nsecond",
+					"timeUntilHidersSword", "5 %Nsecond",
 					timeUntilHidersSword_UP, timeUntilHidersSword,
 					timeUntilHidersSword_DOWN, 30, 39, 48);
 
@@ -157,7 +162,9 @@ public class InventoryHandler {
 					34, 43, 52);
 
 			player.openInventory(panel);
-		} else {
+		}
+		else
+		{
 			MessageM.sendFMessage(player, ConfigC.error_noArena, "name-"
 					+ arenaname);
 		}
@@ -165,7 +172,8 @@ public class InventoryHandler {
 
 	public static void updownButton(Inventory panel, Arena arena, ArenaType at,
 			String option, String addremove, ItemStack UP, ItemStack BUTTON,
-			ItemStack DOWN, int up, int button, int down) {
+			ItemStack DOWN, int up, int button, int down)
+	{
 		ItemMeta UP_IM = UP.getItemMeta();
 		UP_IM.setDisplayName(MessageM.replaceAll(
 				(String) W.messages.get(ConfigC.button_add), "1-" + addremove,
@@ -173,7 +181,8 @@ public class InventoryHandler {
 		UP.setItemMeta(UP_IM);
 
 		int setting = 0;
-		switch (at) {
+		switch (at)
+		{
 		case maxPlayers:
 			setting = arena.maxPlayers;
 			break;
@@ -223,7 +232,8 @@ public class InventoryHandler {
 		panel.setItem(down, DOWN);
 	}
 
-	public static void openDisguiseBlocks(Arena arena, Player player) {
+	public static void openDisguiseBlocks(Arena arena, Player player)
+	{
 		String arenaname = arena.arenaName;
 		Inventory panel = Bukkit.createInventory(null, 36,
 				MessageM.replaceAll("%N&lDisguiseBlocks"));
@@ -238,22 +248,27 @@ public class InventoryHandler {
 		arenaNameNote_IM.setLore(lores);
 		arenaNameNote.setItemMeta(arenaNameNote_IM);
 		panel.setItem(0, arenaNameNote);
-		if (arena.disguiseBlocks != null) {
-			for (int i = arena.disguiseBlocks.size(); i > 0; i = i - 1) {
+		if (arena.disguiseBlocks != null)
+		{
+			for (int i = arena.disguiseBlocks.size(); i > 0; i = i - 1)
+			{
 				panel.setItem(i, arena.disguiseBlocks.get(i - 1));
 			}
 		}
 		player.openInventory(panel);
 	}
 
-	public static void openShop(Player player) {
+	public static void openShop(Player player)
+	{
 		Inventory shop = Bukkit.createInventory(
 				null,
 				9,
 				MessageM.replaceAll("\u00A7r"
 						+ W.config.get(ConfigC.shop_title)));
-		if (W.config.getFile().getBoolean("vaultSupport") == true) {
-			if (BlockHunt.econ != null) {
+		if (W.config.getFile().getBoolean("vaultSupport") == true)
+		{
+			if (BlockHunt.econ != null)
+			{
 				int vaultBalance = (int) BlockHunt.econ.getBalance(player
 						.getName());
 				List<String> lores = new ArrayList<String>();
@@ -275,7 +290,8 @@ public class InventoryHandler {
 				lores = W.config.getFile().getStringList(
 						ConfigC.shop_blockChooserv1Description.location);
 				lores2 = new ArrayList<String>();
-				for (String lore : lores) {
+				for (String lore : lores)
+				{
 					lores2.add(MessageM.replaceAll(lore));
 				}
 
@@ -298,7 +314,8 @@ public class InventoryHandler {
 				lores = W.config.getFile().getStringList(
 						ConfigC.shop_BlockHuntPassv2Description.location);
 				lores2 = new ArrayList<String>();
-				for (String lore : lores) {
+				for (String lore : lores)
+				{
 					lores2.add(MessageM.replaceAll(lore));
 				}
 
@@ -315,16 +332,21 @@ public class InventoryHandler {
 						&& ((Boolean) W.shop.getFile().get(
 								player.getName() + ".blockchooser") == null && !PermissionsM
 								.hasPerm(player, Permissions.shopblockchooser,
-										false))) {
+										false)))
+				{
 					shop.setItem(1, shopBlockChooser);
 				}
-				if ((Boolean) W.config.get(ConfigC.shop_BlockHuntPassv2Enabled) == true) {
+				if ((Boolean) W.config.get(ConfigC.shop_BlockHuntPassv2Enabled) == true)
+				{
 					shop.setItem(2, shopBlockHuntPass);
 				}
 			}
 			player.openInventory(shop);
-		} else {
-			if (W.shop.getFile().get(player.getName() + ".tokens") == null) {
+		}
+		else
+		{
+			if (W.shop.getFile().get(player.getName() + ".tokens") == null)
+			{
 				W.shop.getFile().set(player.getName() + ".tokens", 0);
 				W.shop.save();
 			}
@@ -349,7 +371,8 @@ public class InventoryHandler {
 			lores = W.config.getFile().getStringList(
 					ConfigC.shop_blockChooserv1Description.location);
 			lores2 = new ArrayList<String>();
-			for (String lore : lores) {
+			for (String lore : lores)
+			{
 				lores2.add(MessageM.replaceAll(lore));
 			}
 
@@ -370,7 +393,8 @@ public class InventoryHandler {
 			lores = W.config.getFile().getStringList(
 					ConfigC.shop_BlockHuntPassv2Description.location);
 			lores2 = new ArrayList<String>();
-			for (String lore : lores) {
+			for (String lore : lores)
+			{
 				lores2.add(MessageM.replaceAll(lore));
 			}
 
@@ -386,10 +410,12 @@ public class InventoryHandler {
 					&& ((Boolean) W.shop.getFile().get(
 							player.getName() + ".blockchooser") == null && !PermissionsM
 							.hasPerm(player, Permissions.shopblockchooser,
-									false))) {
+									false)))
+			{
 				shop.setItem(1, shopBlockChooser);
 			}
-			if ((Boolean) W.config.get(ConfigC.shop_BlockHuntPassv2Enabled) == true) {
+			if ((Boolean) W.config.get(ConfigC.shop_BlockHuntPassv2Enabled) == true)
+			{
 				shop.setItem(2, shopBlockHuntPass);
 			}
 			player.openInventory(shop);

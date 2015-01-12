@@ -10,7 +10,7 @@ public class DisguiseDelegate
 
 	WrapperInterface m_wrapper = null;
 	
-	final DELEGATE_WRAPPER m_wrapperType = DELEGATE_WRAPPER.WRAPPER_DISGUISECRAFT;
+	final DELEGATE_WRAPPER m_wrapperType = DELEGATE_WRAPPER.WRAPPER_LIBSDISGUISE;
 
 	public enum DELEGATE_WRAPPER
 	{
