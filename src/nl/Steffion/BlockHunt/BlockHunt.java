@@ -239,7 +239,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				"fjoin", Permissions.allcommands, ConfigC.help_forcejoin,
 				true,
 				BlockHuntCMD, new CMDforcejoin(),
-				"/BlockHunt <forcejoin|fjoin> <random:all|this> | <arena:name>");
+				"/BlockHunt <forcejoin|fjoin> <random> | <arena:name>");
 
 		DisguiseDelegate.GetSingleton().SetupDisguiseCraft(getServer());
 
