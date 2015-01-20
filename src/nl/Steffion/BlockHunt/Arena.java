@@ -164,4 +164,48 @@ public class Arena implements ConfigurationSerializable {
 				new ArrayList<Player>(), Bukkit.getScoreboardManager()
 						.getNewScoreboard());
 	}
+	
+	public Player getRandomPlayer()
+	{
+		long start = System.currentTimeMillis();
+		List<Player> tmpList = new ArrayList<Player>();
+		List<Player> workList = new ArrayList<Player>();
+		workList = playersInArena;
+		while(workList.size() > 1)
+		{
+			if(System.currentTimeMillis() - start >= 500) //if costs more than 500ms, get random directly
+			{
+				return playersInArena
+						.get(W.random
+								.nextInt(playersInArena
+										.size()));
+			}
+
+			tmpList.clear();
+			for(Player pl : workList)
+			{
+				if(W.random.nextFloat() > 0.5)
+				{
+					tmpList.add(pl);
+				}
+				if(tmpList.isEmpty())
+				{
+					tmpList.add( workList.get( W.random.nextInt( workList.size() ) ) );
+				}
+			}
+			workList = tmpList;
+		}
+		if(workList.size() == 1)
+		{
+			return workList.get(0);
+		}
+		if(tmpList.isEmpty())
+		{
+			return playersInArena
+					.get(W.random
+							.nextInt(playersInArena
+									.size()));
+		}
+		return null;
+	}
 }

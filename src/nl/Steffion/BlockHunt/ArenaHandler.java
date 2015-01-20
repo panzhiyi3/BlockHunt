@@ -404,7 +404,7 @@ public class ArenaHandler {
 	{
 		if( arena != null & arena.killScore != null )
 		{
-			MessageM.broadcastMessage("Top Killers:");
+			MessageM.broadcastMessage("%NTop Killers:");
 			int maxScore = 0;
 			Player maxKiller = null;
 			for( Player pl : arena.playersInArena)
@@ -423,8 +423,8 @@ public class ArenaHandler {
 				return;
 			}
 			arena.killScore.remove(maxKiller);
-			MessageM.broadcastMessage("1st: " + maxKiller.getName()
-					+ " killed " + maxScore + " players!");
+			MessageM.broadcastMessage("%N1st: %A" + maxKiller.getName()
+					+ "%N 击杀 " + maxScore + " 名玩家!");
 			
 			maxScore = 0;
 			maxKiller = null;
@@ -444,8 +444,8 @@ public class ArenaHandler {
 				return;
 			}
 			arena.killScore.remove(maxKiller);
-			MessageM.broadcastMessage("2nd: " + maxKiller.getName()
-					+ " killed " + maxScore + " players!");
+			MessageM.broadcastMessage("%N2nd: %A" + maxKiller.getName()
+					+ " %N击杀 " + maxScore + " 名玩家!");
 			
 			maxScore = 0;
 			maxKiller = null;
@@ -465,8 +465,8 @@ public class ArenaHandler {
 				return;
 			}
 			//arena.killScore.remove(maxKiller);
-			MessageM.broadcastMessage("3rd: " + maxKiller.getName()
-					+ " killed " + maxScore + " players!");
+			MessageM.broadcastMessage("%N3rd: %A" + maxKiller.getName()
+					+ " %N击杀 " + maxScore + " 名玩家!");
 		}
 	}
 	

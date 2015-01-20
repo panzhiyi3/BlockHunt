@@ -471,10 +471,11 @@ public class BlockHunt extends JavaPlugin implements Listener {
 							for (int i = arena.amountSeekersOnStart; i > 0; i = i - 1)
 							{
 								boolean loop = true;
-								Player seeker = arena.playersInArena
-										.get(W.random
-												.nextInt(arena.playersInArena
-														.size()));
+								//Player seeker = arena.playersInArena
+								//		.get(W.random
+								//				.nextInt(arena.playersInArena
+								//						.size()));
+								Player seeker = arena.getRandomPlayer();
 
 								for (Player playerCheck : arena.playersInArena)
 								{
