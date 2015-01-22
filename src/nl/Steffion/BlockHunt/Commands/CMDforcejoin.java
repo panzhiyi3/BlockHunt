@@ -69,10 +69,11 @@ public class CMDforcejoin extends DefaultCMD
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private Arena getRandArena()
 	{
 		long start = System.currentTimeMillis();
-		ArrayList<Arena> workList = W.arenaList;
+		ArrayList<Arena> workList = (ArrayList<Arena>) W.arenaList.clone();
 		ArrayList<Arena> nextList = new ArrayList<Arena>();
 		if(workList.size() == 0)
 		{
@@ -94,12 +95,12 @@ public class CMDforcejoin extends DefaultCMD
 				{
 					nextList.add(arena); //我不会Java！我不知道在遍历里如何像C++一样安全的删除迭代器！
 				}
-				if(nextList.isEmpty())
-				{
-					nextList.add( workList.get( W.random.nextInt( workList.size() ) ) );
-				}
 			}
-			workList = nextList;
+			if(nextList.isEmpty())
+			{
+				nextList.add( workList.get( W.random.nextInt( workList.size() ) ) );
+			}
+			workList = (ArrayList<Arena>) nextList.clone();
 		}
 		if(workList.size() == 1)
 		{

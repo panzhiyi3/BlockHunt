@@ -39,7 +39,7 @@ public class Arena implements ConfigurationSerializable {
 	public int hidersTokenWin;
 	public int killTokens;
 
-	public List<Player> playersInArena;
+	public ArrayList<Player> playersInArena;
 	public ArenaState gameState;
 	public int timer;
 	public List<Player> seekers;
@@ -57,7 +57,7 @@ public class Arena implements ConfigurationSerializable {
 			LocationSerializable seekersWarp, LocationSerializable spawnWarp,
 			List<String> seekersWinCommands, List<String> hidersWinCommands,
 			List<String> allowedCommands, int seekersTokenWin,
-			int hidersTokenWin, int killTokens, List<Player> playersInArena,
+			int hidersTokenWin, int killTokens, ArrayList<Player> playersInArena,
 			ArenaState gameState, int timer, List<Player> seekers,
 			Scoreboard scoreboard) {
 		this.arenaName = arenaName;
@@ -164,13 +164,13 @@ public class Arena implements ConfigurationSerializable {
 				new ArrayList<Player>(), Bukkit.getScoreboardManager()
 						.getNewScoreboard());
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	public Player getRandomPlayer()
 	{
 		long start = System.currentTimeMillis();
-		List<Player> tmpList = new ArrayList<Player>();
-		List<Player> workList = new ArrayList<Player>();
-		workList = playersInArena;
+		ArrayList<Player> tmpList = new ArrayList<Player>();
+		ArrayList<Player> workList = (ArrayList<Player>) playersInArena.clone();
 		while(workList.size() > 1)
 		{
 			if(System.currentTimeMillis() - start >= 500) //if costs more than 500ms, get random directly
@@ -188,12 +188,12 @@ public class Arena implements ConfigurationSerializable {
 				{
 					tmpList.add(pl);
 				}
-				if(tmpList.isEmpty())
-				{
-					tmpList.add( workList.get( W.random.nextInt( workList.size() ) ) );
-				}
 			}
-			workList = tmpList;
+			if(tmpList.isEmpty())
+			{
+				tmpList.add( workList.get( W.random.nextInt( workList.size() ) ) );
+			}
+			workList = (ArrayList<Player>) tmpList.clone();
 		}
 		if(workList.size() == 1)
 		{
