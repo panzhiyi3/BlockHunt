@@ -32,9 +32,10 @@ public class CMDforcejoin extends DefaultCMD
 					Arena arena = getRandArena();
 					if(arena != null)
 					{
-						MessageM.broadcastMessage("通知:" + player.getName()
-								+ "邀(强)请(制)各位玩家进入躲猫猫房间:"
+						MessageM.sendMessage(player, "你已强制所有玩家进入躲猫猫房间:"
 								+ arena.arenaName);
+						MessageM.broadcastMessage("通知:" + player.getName()
+								+ "邀(强)请(制)各位玩家进入躲猫猫房间");
 						Player[] players = org.bukkit.Bukkit.getOnlinePlayers();
 						for(Player pl : players)
 						{
@@ -48,9 +49,10 @@ public class CMDforcejoin extends DefaultCMD
 					{
 						if(arena.arenaName.equals(args[1]))
 						{
-							MessageM.broadcastMessage("通知: " + player.getName()
-									+ " 邀(强)请(制)各位玩家进入躲猫猫房间:"
+							MessageM.sendMessage(player, "你已强制所有玩家进入躲猫猫房间:"
 									+ arena.arenaName);
+							MessageM.broadcastMessage("通知: " + player.getName()
+									+ " 邀(强)请(制)各位玩家进入躲猫猫房间");
 							Player[] players = org.bukkit.Bukkit.getOnlinePlayers();
 							for(Player pl : players)
 							{

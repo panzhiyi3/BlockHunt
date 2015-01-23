@@ -22,6 +22,7 @@ import nl.Steffion.BlockHunt.Commands.CMDshop;
 import nl.Steffion.BlockHunt.Commands.CMDstart;
 import nl.Steffion.BlockHunt.Commands.CMDtokens;
 import nl.Steffion.BlockHunt.Commands.CMDwand;
+import nl.Steffion.BlockHunt.Listeners.OnAsyncPlayerChatEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockBreakEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockPlaceEvent;
 import nl.Steffion.BlockHunt.Listeners.OnEntityDamageByEntityEvent;
@@ -158,6 +159,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 		//getServer().getPluginManager().registerEvents(new OnEntityShootBowEvent(),
 		//		this);
 		getServer().getPluginManager().registerEvents(new OnEntityDeathEvent(),
+				this);
+		getServer().getPluginManager().registerEvents(new OnAsyncPlayerChatEvent(),
 				this);
 
 		ConfigurationSerialization.registerClass(LocationSerializable.class,
