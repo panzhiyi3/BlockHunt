@@ -46,6 +46,7 @@ public class W {
 
 	public static HashMap<Player, LocationSerializable> pos1 = new HashMap<Player, LocationSerializable>();
 	public static HashMap<Player, LocationSerializable> pos2 = new HashMap<Player, LocationSerializable>();
+	public static HashMap<Player, LocationSerializable> singularPos = new HashMap<Player, LocationSerializable>();
 
 	public static ArrayList<Arena> arenaList = new ArrayList<Arena>();
 	public static Random random = new Random();

@@ -14,12 +14,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class CMDwand extends DefaultCMD {
+public class CMDwand extends DefaultCMD
+{
 
 	@Override
 	public boolean exectue(Player player, Command cmd, String label,
-			String[] args) {
-		if (player != null) {
+			String[] args)
+	{
+		if (player != null)
+		{
 			ItemStack wand = new ItemStack(
 					Material.getMaterial((String) W.config
 							.get(ConfigC.wandIDname)));
@@ -37,11 +40,34 @@ public class CMDwand extends DefaultCMD {
 			im.setLore(lores2);
 			wand.setItemMeta(im);
 			player.getInventory().addItem(wand);
+
+			// Add singularity wand
+			ItemStack singualrWand = new ItemStack(
+					Material.getMaterial((String) W.config
+							.get(ConfigC.singularWandIDname)));
+			ItemMeta singularIm = singualrWand.getItemMeta();
+			singularIm.setDisplayName(MessageM.replaceAll((String) W.config
+					.get(ConfigC.singularWandName)));
+
+			List<String> singularLores = W.config.getFile().getStringList(
+					ConfigC.singularWandDescription.location);
+			List<String> singularLores2 = new ArrayList<String>();
+			for (String lore : singularLores)
+			{
+				singularLores2.add(MessageM.replaceAll(lore));
+			}
+
+			singularIm.setLore(singularLores2);
+			singualrWand.setItemMeta(singularIm);
+			player.getInventory().addItem(singualrWand);
+
 			player.playSound(player.getLocation(), Sound.ORB_PICKUP, 5, 0);
 			MessageM.sendFMessage(player, ConfigC.normal_wandGaveWand, "type-"
 					+ wand.getType().toString().replaceAll("_", " ")
 							.toLowerCase());
-		} else {
+		}
+		else
+		{
 			MessageM.sendFMessage(player, ConfigC.error_onlyIngame);
 		}
 		return true;

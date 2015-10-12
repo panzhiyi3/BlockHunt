@@ -55,6 +55,15 @@ public enum ConfigC {
 			"%NUse the create command to define your arena.",
 			"%A/" + BlockHunt.pdfFile.getName() + " <help|h>" }, W.config),
 
+	singularWandIDname ("STICK", W.config),
+	singularWandName ("%A&l" + BlockHunt.pdfFile.getName() + "%N's singularity point selection wand",
+			W.config),
+	singularWandDescription (new String[] {
+			"%NUse this item to select a singularity point for your arena.",
+			"%ALeft-Click%N to add point.",
+			"%ARight-Click%N to delete point.",
+			"%A/" + BlockHunt.pdfFile.getName() + " <help|h>" }, W.config),
+
 	shop_title ("%H&lBlockHunt %NShop", W.config),
 	shop_price ("%NPrice: %A%amount% %Ntokens.", W.config),
 	shop_vaultPrice ("%NPrice: %A%amount%", W.config),
@@ -155,6 +164,8 @@ public enum ConfigC {
 			W.messages),
 	normal_wandSetPosition ("%TAG%NSet position %A#%number%%N to location: (%A%x%%N, %A%y%%N, %A%z%%N).",
 			W.messages),
+	normal_singularWandSetPosition ("%TAG%NSet singular position to location: (%A%x%%N, %A%y%%N, %A%z%%N).",
+			W.messages),
 	normal_createCreatedArena ("%TAG%NCreated an arena with the name '%A%name%%N'.",
 			W.messages),
 	normal_lobbyArenaIsStarting ("%TAG%N本场躲猫猫将在%A%1%%N秒内开始!",
@@ -177,6 +188,12 @@ public enum ConfigC {
 	normal_winSeekers ("%TAG %ASEEKERS%N 赢得了比赛!", W.messages),
 	normal_winHiders ("%TAG %AHIDERS%N 赢得了比赛!", W.messages),
 	normal_setwarpWarpSet ("%TAG%NSet warp '%A%warp%%N' to your location!",
+			W.messages),
+	normal_setSingularWarpSetFailed ("%TAG%NSet warp '%A%warp%%N' failed! The point you chose is not in the arena '%A%arena%",
+			W.messages),
+	normal_delwarpWarpSet ("%TAG%NDel warp '%A%warp%%N' to your location!",
+			W.messages),
+	normal_delAllSingularWarpSet ("%TAG%NDel all singular points at arena '%A%arena%'!",
 			W.messages),
 	normal_addedToken ("%TAG%A%amount%%N 大洋跑到了你的荷包中",
 			W.messages),
@@ -270,6 +287,10 @@ public enum ConfigC {
 	error_shopMaxHidersReached ("%TAG%ESorry, the maximum amount of hiders has been reached!",
 			W.messages),
 	error_trueVaultNull ("%TAG%EVault has been enabled in the config.yml but cannot find the 'Vault' plugin! The plugin will not run",
+			W.messages),
+	error_singularPointTooClose ("%TAG%EThe singular point you choose is too close to another one in the arena.",
+			W.messages),
+	error_singularPointDiffWorld ("%TAG%EThe singular point you choose is not the same world as the arene.",
 			W.messages);
 
 	public Object value;

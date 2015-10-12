@@ -9,6 +9,7 @@ import nl.Steffion.BlockHunt.ConfigC;
 import nl.Steffion.BlockHunt.ScoreboardHandler;
 import nl.Steffion.BlockHunt.W;
 import nl.Steffion.BlockHunt.Managers.MessageM;
+import nl.Steffion.BlockHunt.Serializables.LocationSerializable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -29,7 +30,9 @@ public class CMDcreate extends DefaultCMD {
 					if (W.pos1.get(player).getWorld()
 							.equals(W.pos2.get(player).getWorld())) {
 						Arena arena = new Arena(args[1], W.pos1.get(player),
-								W.pos2.get(player), 12, 3, 1, 50, 20, 300, 30,
+								W.pos2.get(player), 
+								new ArrayList<LocationSerializable>(),
+								12, 3, 1, 50, 20, 300, 30,
 								new ArrayList<ItemStack>(), null, null, null,
 								null, new ArrayList<String>(),
 								new ArrayList<String>(),

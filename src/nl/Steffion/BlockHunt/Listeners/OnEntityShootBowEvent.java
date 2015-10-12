@@ -28,7 +28,7 @@ public class OnEntityShootBowEvent implements Listener {
 				Player player = (Player) le;
 				Location loc = entity.getLocation();
 				Vector dir = loc.getDirection();
-				Vector vec = dir.multiply(new Vector(1,0,0));
+				Vector vec = dir.multiply(new Vector(1,0,0)); //NB,Check this!
 				loc.add(vec);
 				
 				for (Arena arena : W.arenaList)

@@ -32,6 +32,7 @@ public class Arena implements ConfigurationSerializable {
 	public LocationSerializable hidersWarp;
 	public LocationSerializable seekersWarp;
 	public LocationSerializable spawnWarp;
+	public List<LocationSerializable> singularPoints;
 	public List<String> seekersWinCommands;
 	public List<String> hidersWinCommands;
 	public List<String> allowedCommands;
@@ -49,7 +50,9 @@ public class Arena implements ConfigurationSerializable {
 	public Map<Player, Integer> killScore = new HashMap<Player, Integer>();
 
 	public Arena (String arenaName, LocationSerializable pos1,
-			LocationSerializable pos2, int maxPlayers, int minPlayers,
+			LocationSerializable pos2,
+			List<LocationSerializable> singularPoints,
+			int maxPlayers, int minPlayers,
 			int amountSeekersOnStart, int timeInLobbyUntilStart,
 			int waitingTimeSeeker, int gameTime, int timeUntilHidersSword,
 			ArrayList<ItemStack> disguiseBlocks,
@@ -63,6 +66,7 @@ public class Arena implements ConfigurationSerializable {
 		this.arenaName = arenaName;
 		this.pos1 = pos1;
 		this.pos2 = pos2;
+		this.singularPoints = singularPoints;
 		this.maxPlayers = maxPlayers;
 		this.minPlayers = minPlayers;
 		this.amountSeekersOnStart = amountSeekersOnStart;
@@ -112,6 +116,7 @@ public class Arena implements ConfigurationSerializable {
 		map.put("arenaName", arenaName);
 		map.put("pos1", pos1);
 		map.put("pos2", pos2);
+		map.put("singularPoints", singularPoints);
 		map.put("maxPlayers", maxPlayers);
 		map.put("minPlayers", minPlayers);
 		map.put("amountSeekersOnStart", amountSeekersOnStart);
@@ -139,7 +144,9 @@ public class Arena implements ConfigurationSerializable {
 				Bukkit.getWorld("world"), 0, 0, 0, 0, 0);
 		return new Arena((String) M.g(map, "arenaName", "UNKNOWN_NAME"),
 				(LocationSerializable) M.g(map, "pos1", loc),
-				(LocationSerializable) M.g(map, "pos2", loc), (Integer) M.g(
+				(LocationSerializable) M.g(map, "pos2", loc),
+				(List<LocationSerializable>) M.g(map, "singularPoints", new ArrayList<LocationSerializable>()),
+				(Integer) M.g(
 						map, "maxPlayers", 12), (Integer) M.g(map,
 						"minPlayers", 3), (Integer) M.g(map,
 						"amountSeekersOnStart", 1), (Integer) M.g(map,
