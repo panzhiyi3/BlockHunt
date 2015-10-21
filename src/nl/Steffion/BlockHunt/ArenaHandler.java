@@ -469,7 +469,7 @@ public class ArenaHandler {
 					+ " %N»÷É± " + maxScore + " ÃûÍæ¼Ò!");
 		}
 	}
-	
+
 	public static void seekersWin(Arena arena)
 	{
 		ArenaHandler.sendFMessage(arena, ConfigC.normal_winSeekers);
@@ -528,6 +528,15 @@ public class ArenaHandler {
 		if(arena.killScore != null)
 		{
 			arena.killScore.clear();
+		}
+		
+		try
+		{
+			WorldPerformer.recoverTheArena(arena.pos1.getWorld(), arena);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
@@ -599,14 +608,25 @@ public class ArenaHandler {
 		{
 			arena.killScore.clear();
 		}
+
+		try
+		{
+			WorldPerformer.recoverTheArena(arena.pos1.getWorld(), arena);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
-	public static void stopArena(Arena arena) {
+	public static void stopArena(Arena arena)
+	{
 		ArenaHandler.sendFMessage(arena, ConfigC.warning_arenaStopped);
 
 		arena.seekers.clear();
 
-		for (Player player : arena.playersInArena) {
+		for (Player player : arena.playersInArena)
+		{
 			playerLeaveArena(player, false, false);
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 		}
@@ -614,5 +634,17 @@ public class ArenaHandler {
 		arena.gameState = ArenaState.WAITING;
 		arena.timer = 0;
 		arena.playersInArena.clear();
+
+		if(!arena.singularPoints.isEmpty())
+		{
+			try
+			{
+				WorldPerformer.recoverTheArena(arena.pos1.getWorld(), arena);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 }

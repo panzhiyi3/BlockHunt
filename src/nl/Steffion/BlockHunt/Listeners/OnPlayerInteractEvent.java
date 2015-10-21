@@ -1,5 +1,7 @@
 package nl.Steffion.BlockHunt.Listeners;
 
+import java.util.ListIterator;
+
 import nl.Steffion.BlockHunt.Arena;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.ArenaHandler;
@@ -22,6 +24,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -47,7 +50,7 @@ public class OnPlayerInteractEvent implements Listener
 		Player player = event.getPlayer();
 		Block block = event.getClickedBlock();
 
-		if (PermissionsM.hasPerm(player, Permissions.create, false))
+		if (player != null && PermissionsM.hasPerm(player, Permissions.create, false))
 		{
 			processWandEvent(event, player, block);
 		}
@@ -217,7 +220,7 @@ public class OnPlayerInteractEvent implements Listener
 				}
 			}
 		}
-		if (item.getItemMeta().hasDisplayName())
+		if (item.getItemMeta() != null && item.getItemMeta().hasDisplayName())
 		{
 			ItemMeta im = item.getItemMeta();
 			{
@@ -324,13 +327,38 @@ public class OnPlayerInteractEvent implements Listener
 
 	private void processOpenBlock(PlayerInteractEvent event, Player player, Block block)
 	{
-		Material mat = event.getClickedBlock().getType();
+		Material mat = block.getType();
 		if (mat != Material.AIR)
 		{
-			if (mat.equals(Material.ENCHANTMENT_TABLE)
+			if(mat.equals(Material.CHEST))
+			{
+				boolean found = false;
+				for (Arena arena : W.arenaList)
+				{
+					if (arena.playersInArena.contains(player))
+					{
+						event.setCancelled(true);
+						found = true;
+						break;
+					}
+				}
+
+				if(block.hasMetadata("UnlimitedArrowWorks"))
+				{
+					if(!found)
+					{
+						if(block.getState() instanceof Chest)
+						{
+							Chest chest = (Chest) block.getState();
+							fillUnlimitedArrowWorks(chest);
+						}
+					}
+				}
+			}
+			else if (mat.equals(Material.ENCHANTMENT_TABLE)
 					|| mat.equals(Material.WORKBENCH)
 					|| mat.equals(Material.FURNACE)
-					|| mat.equals(Material.CHEST) || mat.equals(Material.ANVIL)
+					|| mat.equals(Material.ANVIL)
 					|| mat.equals(Material.ENDER_CHEST)
 					|| mat.equals(Material.JUKEBOX)
 					|| block.getFace(block).equals(Material.FIRE))
@@ -340,12 +368,51 @@ public class OnPlayerInteractEvent implements Listener
 					if (arena.playersInArena.contains(player))
 					{
 						event.setCancelled(true);
+						break;
 					}
 				}
 			}
 		}
 	}
-	
+
+	private void fillUnlimitedArrowWorks(Chest chest)
+	{
+		int size = chest.getInventory().getSize();
+		int maxSize = chest.getInventory().getMaxStackSize();
+		if(size < maxSize)
+		{
+			int maxBowNum = (int) ((float) maxSize * 0.3);
+			int maxArrowNum = maxSize - maxBowNum;
+			int bowNum = 0;
+			int arrowNum = 0;
+
+			ListIterator<ItemStack> itr = chest.getInventory().iterator();
+			for(; itr.hasNext();)
+			{
+				ItemStack item = itr.next();
+				if(item != null)
+				{
+					if(item.getType() == Material.ARROW)
+					{
+						arrowNum++;
+					}
+					else if(item.getType() == Material.BOW)
+					{
+						bowNum++;
+					}
+				}
+			}
+			for(; arrowNum < maxArrowNum; arrowNum++)
+			{
+				chest.getInventory().addItem(new ItemStack(Material.ARROW, 64));
+			}
+			for(; bowNum < maxBowNum; bowNum++)
+			{
+				chest.getInventory().addItem(new ItemStack(Material.BOW, 1));
+			}
+		}
+	}
+
 	private void processClickedHider(PlayerInteractEvent event, Player player)
 	{
 		for (Arena arena : W.arenaList)
@@ -373,7 +440,7 @@ public class OnPlayerInteractEvent implements Listener
 			}
 		}
 	}
-	
+
 	private void processNyanSugar(Player player)
 	{
 		for (Arena arena : W.arenaList)

@@ -84,6 +84,11 @@ public class CMDsetwarp extends DefaultCMD
 						if(singularParam.isEmpty())
 						{
 							LocationSerializable sinPos = W.singularPos.get(player);
+							if(sinPos == null)
+							{
+								return true;
+							}
+
 							for (LocationSerializable pos : arena.singularPoints)
 							{
 								LocationSerializable posTmp = (LocationSerializable) pos.clone();

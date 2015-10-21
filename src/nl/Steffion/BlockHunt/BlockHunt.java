@@ -22,6 +22,7 @@ import nl.Steffion.BlockHunt.Commands.CMDshop;
 import nl.Steffion.BlockHunt.Commands.CMDstart;
 import nl.Steffion.BlockHunt.Commands.CMDtokens;
 import nl.Steffion.BlockHunt.Commands.CMDwand;
+import nl.Steffion.BlockHunt.Commands.CMDuaw;
 import nl.Steffion.BlockHunt.Listeners.OnAsyncPlayerChatEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockBreakEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockPlaceEvent;
@@ -104,6 +105,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 			add("remove");
 			add("tokens");
 			add("forcejoin");
+			add("uaw");
 		}
 	};
 
@@ -123,6 +125,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 	public static CommandM CMDremove;
 	public static CommandM CMDtokens;
 	public static CommandM CMDforcejoin;
+	public static CommandM CMDuaw;
 
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
@@ -243,6 +246,11 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				true,
 				BlockHuntCMD, new CMDforcejoin(),
 				"/BlockHunt <forcejoin|fjoin> <random> | <arena:name>");
+		CMDuaw = new CommandM("BlockHunt UAW", "BlockHunt", "arrowworks",
+				"uaw", Permissions.allcommands, ConfigC.help_uaw,
+				true,
+				BlockHuntCMD, new CMDuaw(),
+				"/BlockHunt <arrowworks|uaw>");
 
 		DisguiseDelegate.GetSingleton().SetupDisguiseCraft(getServer());
 
@@ -605,6 +613,16 @@ public class BlockHunt extends JavaPlugin implements Listener {
 								arena.killScore.put(pl, 0);
 							}
 						}
+
+						try
+						{
+							WorldPerformer.randomTheArena(arena.pos1.getWorld(), arena);
+						}
+						catch (Exception e)
+						{
+							e.printStackTrace();
+						}
+
 						ArenaHandler.sendFMessage(arena,
 								ConfigC.normal_lobbyArenaIsStarting,
 								"1-1");
