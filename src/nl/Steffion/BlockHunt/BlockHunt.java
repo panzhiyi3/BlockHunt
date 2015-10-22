@@ -23,6 +23,8 @@ import nl.Steffion.BlockHunt.Commands.CMDstart;
 import nl.Steffion.BlockHunt.Commands.CMDtokens;
 import nl.Steffion.BlockHunt.Commands.CMDwand;
 import nl.Steffion.BlockHunt.Commands.CMDuaw;
+import nl.Steffion.BlockHunt.Commands.CMDtp;
+import nl.Steffion.BlockHunt.Commands.CMDname;
 import nl.Steffion.BlockHunt.Listeners.OnAsyncPlayerChatEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockBreakEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockPlaceEvent;
@@ -106,6 +108,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 			add("tokens");
 			add("forcejoin");
 			add("uaw");
+			add("tp");
+			add("name");
 		}
 	};
 
@@ -126,6 +130,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 	public static CommandM CMDtokens;
 	public static CommandM CMDforcejoin;
 	public static CommandM CMDuaw;
+	public static CommandM CMDtp;
+	public static CommandM CMDname;
 
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
@@ -251,6 +257,16 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				true,
 				BlockHuntCMD, new CMDuaw(),
 				"/BlockHunt <arrowworks|uaw>");
+		CMDtp = new CommandM("BlockHunt TP", "BlockHunt", "tp",
+				"tp", Permissions.allcommands, ConfigC.help_tp,
+				true,
+				BlockHuntCMD, new CMDtp(),
+				"/BlockHunt tp ArenaName");
+		CMDname = new CommandM("BlockHunt NAME", "BlockHunt", "name",
+				"name", Permissions.allcommands, ConfigC.help_tp,
+				true,
+				BlockHuntCMD, new CMDname(),
+				"/BlockHunt name <on|off>");
 
 		DisguiseDelegate.GetSingleton().SetupDisguiseCraft(getServer());
 
@@ -507,6 +523,30 @@ public class BlockHunt extends JavaPlugin implements Listener {
 	@SuppressWarnings("deprecation")
 	private void mainLoop()
 	{
+		if(W.NameOffMode)
+		{
+			for (Player pl : Bukkit
+					.getOnlinePlayers())
+			{
+				boolean canHide = true;
+				for (Arena arena : W.arenaList)
+				{
+					if(arena.playersInArena.contains(pl))
+					{
+						canHide = false;
+						break;
+					}
+				}
+				if(canHide)
+				{
+					if(!DisguiseDelegate.GetSingleton().IsDisguised(pl))
+					{
+						DisguiseDelegate.GetSingleton().DisguiseAsPlayer(pl);
+					}
+				}
+			}
+		}
+
 		for (Arena arena : W.arenaList)
 		{
 			if (arena.gameState == ArenaState.WAITING)

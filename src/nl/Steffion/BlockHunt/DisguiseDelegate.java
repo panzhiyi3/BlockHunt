@@ -62,6 +62,11 @@ public class DisguiseDelegate
 		m_wrapper.Disguise(player, type, block);
 	}
 
+	public void DisguiseAsPlayer(Player player)
+	{
+		m_wrapper.DisguiseAsPlayer(player);
+	}
+
 	public void UnDisguise(Player player)
 	{
 		m_wrapper.UnDisguise(player);

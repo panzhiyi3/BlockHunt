@@ -67,6 +67,16 @@ public class LibsDisguiseWrapper implements WrapperInterface
 		}
 	}
 
+	public void DisguiseAsPlayer(Player player)
+	{
+		if(player != null)
+		{
+			MobDisguise mobDisguise = new MobDisguise(
+					DisguiseType.SKELETON, true, true);
+			DisguiseAPI.disguiseToAll(player, mobDisguise);
+		}
+	}
+
 	public void UnDisguise(Player player)
 	{
 		if (player != null)

@@ -13,7 +13,9 @@ public interface WrapperInterface
 	public boolean IsDisguised(Player player);
 	
 	public void Disguise(Player player, DISGUISE_TYPE type, ItemStack block);
-	
+
+	public void DisguiseAsPlayer(Player player);
+
 	public void UnDisguise(Player player);
 	
 	public boolean IsBlockOrModCanDisguise(ItemStack item);

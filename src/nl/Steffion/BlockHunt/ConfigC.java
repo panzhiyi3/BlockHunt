@@ -145,6 +145,8 @@ public enum ConfigC {
 	help_tokens ("%NChange someones tokens.", W.messages),
 	help_forcejoin ("%NForce all players join an arena.", W.messages),
 	help_uaw ("%NAdd Unlimited Arrow Works to your inventory.", W.messages),
+	help_tp ("%NTeleport you to arena lobby.", W.messages),
+	help_name ("%NHide of Show player name.", W.messages),
 
 	button_add ("%NAdd %A%1%%N to %A%2%%N", W.messages),
 	button_add2 ("Add", W.messages),

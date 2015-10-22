@@ -80,6 +80,20 @@ public class DisguiseCraftWrapper implements WrapperInterface
 		}
 	}
 
+	public void DisguiseAsPlayer(Player player)
+	{
+		if(m_dcAPI == null)
+		{
+			return;
+		}
+
+		if(player != null)
+		{
+			Disguise dis = new Disguise(m_dcAPI.newEntityID(), DisguiseType.Skeleton);
+			m_dcAPI.disguisePlayer(player, dis);
+		}
+	}
+
 	public void UnDisguise(Player player)
 	{
 		if (player != null && m_dcAPI != null)

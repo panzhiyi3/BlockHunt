@@ -60,4 +60,6 @@ public class W {
 	public static HashMap<Player, Location> moveLoc = new HashMap<Player, Location>();
 	public static HashMap<Player, Location> hiddenLoc = new HashMap<Player, Location>();
 	public static HashMap<Player, Boolean> hiddenLocWater = new HashMap<Player, Boolean>();
+
+	public static boolean NameOffMode = false;
 }
