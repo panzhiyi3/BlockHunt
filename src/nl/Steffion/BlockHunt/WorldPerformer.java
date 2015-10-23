@@ -82,7 +82,7 @@ public class WorldPerformer
 			pos1.subtract(1, 0, 1);
 			double orgX = pos1.getX();
 
-			for(int z = 0; z < 2; z++)
+			for(int z = 0; z < 1; z++)
 			{
 				for(int i = 0; i < 3; i++)
 				{
@@ -140,7 +140,7 @@ public class WorldPerformer
 			pos1.subtract(1, 0, 1);
 			double orgX = pos1.getX();
 
-			for(int z = 0; z < 2; z++)
+			for(int z = 0; z < 1; z++)
 			{
 				for(int i = 0; i < 3; i++)
 				{

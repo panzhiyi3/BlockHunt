@@ -240,14 +240,46 @@ public class OnPlayerInteractEvent implements Listener
 											.getName()
 											.equals(player.getWorld().getName()))
 							{
-								if(arena.pos1.getX() < arena.pos2.getX()
-										&& arena.pos1.getZ() < arena.pos2.getZ())
+								boolean xPass = false;
+								boolean zPass = false;
+
+								// test x
+								if(arena.pos1.getX() >= arena.pos2.getX())
 								{
-									setFireworks(arena);
-									break;
+									if( player.getLocation().getX() <= arena.pos1.getX()
+											&& player.getLocation().getX() >= arena.pos2.getX())
+									{
+										xPass = true;
+									}
 								}
-								else if(arena.pos1.getX() > arena.pos2.getX()
-										&& arena.pos1.getZ() > arena.pos2.getZ())
+								else
+								{
+									if( player.getLocation().getX() >= arena.pos1.getX()
+											&& player.getLocation().getX() <= arena.pos2.getX())
+									{
+										xPass = true;
+									}
+								}
+
+								// test z
+								if(arena.pos1.getZ() >= arena.pos2.getZ())
+								{
+									if( player.getLocation().getZ() <= arena.pos1.getZ()
+											&& player.getLocation().getZ() >= arena.pos2.getZ())
+									{
+										zPass = true;
+									}
+								}
+								else
+								{
+									if( player.getLocation().getZ() >= arena.pos1.getZ()
+											&& player.getLocation().getZ() <= arena.pos2.getZ())
+									{
+										zPass = true;
+									}
+								}
+								
+								if(xPass && zPass)
 								{
 									setFireworks(arena);
 									break;

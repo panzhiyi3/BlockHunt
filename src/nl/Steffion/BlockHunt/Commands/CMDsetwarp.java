@@ -139,7 +139,7 @@ public class CMDsetwarp extends DefaultCMD
 									zPass = true;
 								}
 							}
-							
+
 							if(!xPass || !zPass)
 							{
 								MessageM.sendFMessage(player,
