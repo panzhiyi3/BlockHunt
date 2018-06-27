@@ -121,6 +121,12 @@ public enum ConfigC {
 	arrowNumber (24, W.config),
 	seekerArrowNumber (8, W.config),
 
+	theWorldCooldownSeeker (60, W.config),
+	theWorldCooldownHider (999, W.config),
+	theWorldTimeSeeker (1.0f, W.config),
+	theWorldTimeHider (0.5f, W.config),
+	theWorldRange (5, W.config),
+
 	log_enabledPlugin ("%TAG%N%name%&a&k + %N%version% is now Enabled. Made by %A%autors%%N.",
 			W.messages),
 	log_disabledPlugin ("%TAG%N%name%&c&k - %N%version% is now Disabled. Made by %A%autors%%N.",
@@ -147,6 +153,8 @@ public enum ConfigC {
 	help_uaw ("%NAdd Unlimited Arrow Works to your inventory.", W.messages),
 	help_tp ("%NTeleport you to arena lobby.", W.messages),
 	help_name ("%NHide of Show player name.", W.messages),
+	help_battlemode ("%NSwitch on/off Battle Mode or set spawn.", W.messages),
+	help_standmode ("%NSwitch on/off Stand Mode or set spawn.", W.messages),
 
 	button_add ("%NAdd %A%1%%N to %A%2%%N", W.messages),
 	button_add2 ("Add", W.messages),

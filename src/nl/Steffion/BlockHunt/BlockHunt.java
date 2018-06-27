@@ -6,6 +6,7 @@ import java.util.List;
 import net.milkbowl.vault.economy.Economy;
 import nl.Steffion.BlockHunt.Arena.ArenaState;
 import nl.Steffion.BlockHunt.PermissionsC.Permissions;
+import nl.Steffion.BlockHunt.Commands.CMDbattlemode;
 import nl.Steffion.BlockHunt.Commands.CMDcreate;
 import nl.Steffion.BlockHunt.Commands.CMDforcejoin;
 import nl.Steffion.BlockHunt.Commands.CMDhelp;
@@ -21,10 +22,10 @@ import nl.Steffion.BlockHunt.Commands.CMDsetwarp;
 import nl.Steffion.BlockHunt.Commands.CMDshop;
 import nl.Steffion.BlockHunt.Commands.CMDstart;
 import nl.Steffion.BlockHunt.Commands.CMDtokens;
-import nl.Steffion.BlockHunt.Commands.CMDwand;
-import nl.Steffion.BlockHunt.Commands.CMDuaw;
 import nl.Steffion.BlockHunt.Commands.CMDtp;
-import nl.Steffion.BlockHunt.Commands.CMDname;
+import nl.Steffion.BlockHunt.Commands.CMDuaw;
+import nl.Steffion.BlockHunt.Commands.CMDwand;
+import nl.Steffion.BlockHunt.Commands.CMDstandmode;
 import nl.Steffion.BlockHunt.Listeners.OnAsyncPlayerChatEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockBreakEvent;
 import nl.Steffion.BlockHunt.Listeners.OnBlockPlaceEvent;
@@ -40,6 +41,7 @@ import nl.Steffion.BlockHunt.Listeners.OnPlayerInteractEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerJoinEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerMoveEvent;
 import nl.Steffion.BlockHunt.Listeners.OnPlayerQuitEvent;
+import nl.Steffion.BlockHunt.Listeners.OnPlayerRespawnEvent;
 import nl.Steffion.BlockHunt.Listeners.OnSignChangeEvent;
 import nl.Steffion.BlockHunt.Managers.CommandM;
 import nl.Steffion.BlockHunt.Managers.ConfigM;
@@ -109,7 +111,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 			add("forcejoin");
 			add("uaw");
 			add("tp");
-			add("name");
+			add("battlemode");
+			add("standmode");
 		}
 	};
 
@@ -131,7 +134,8 @@ public class BlockHunt extends JavaPlugin implements Listener {
 	public static CommandM CMDforcejoin;
 	public static CommandM CMDuaw;
 	public static CommandM CMDtp;
-	public static CommandM CMDname;
+	public static CommandM CMDbattlemode;
+	public static CommandM CMDstandmode;
 
 	public void onEnable() {
 		getServer().getPluginManager().registerEvents(this, this);
@@ -171,10 +175,13 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				this);
 		getServer().getPluginManager().registerEvents(new OnAsyncPlayerChatEvent(),
 				this);
+		getServer().getPluginManager().registerEvents(new OnPlayerRespawnEvent(),
+				this);
 
 		ConfigurationSerialization.registerClass(LocationSerializable.class,
 				"BlockHuntLocation");
 		ConfigurationSerialization.registerClass(Arena.class, "BlockHuntArena");
+		ConfigurationSerialization.registerClass(BattleField.class, "BlockHuntBattleField");
 
 		pdfFile = getDescription();
 		plugin = this;
@@ -262,11 +269,16 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				true,
 				BlockHuntCMD, new CMDtp(),
 				"/BlockHunt tp ArenaName");
-		CMDname = new CommandM("BlockHunt NAME", "BlockHunt", "name",
-				"name", Permissions.allcommands, ConfigC.help_tp,
+		CMDbattlemode = new CommandM("BlockHunt BattleMode", "BlockHunt", "battlemode",
+				"bm", Permissions.allcommands, ConfigC.help_battlemode,
 				true,
-				BlockHuntCMD, new CMDname(),
-				"/BlockHunt name <on|off>");
+				BlockHuntCMD, new CMDbattlemode(),
+				"/BlockHunt <battlemode|bm> <on|off|setspawn|clearspawn>");
+		CMDstandmode = new CommandM("BlockHunt StandMode", "BlockHunt", "standmode",
+				"sm", Permissions.allcommands, ConfigC.help_standmode,
+				true,
+				BlockHuntCMD, new CMDstandmode(),
+				"/BlockHunt <standmode|sm> <on|off>");
 
 		DisguiseDelegate.GetSingleton().SetupDisguiseCraft(getServer());
 
@@ -288,6 +300,11 @@ public class BlockHunt extends JavaPlugin implements Listener {
 		setupEconomy();
 
 		ArenaHandler.loadArenas();
+		W.battleField.clear();
+		for(String name : W.battlefieldCfg.getFile().getKeys(false))
+		{
+			W.battleField = (BattleField) W.battlefieldCfg.getFile().get(name);
+		}
 		
 		Common.Init();
 
@@ -370,6 +387,7 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				"version-" + BlockHunt.pdfFile.getVersion(), "autors-"
 						+ BlockHunt.pdfFile.getAuthors().get(0));
 
+		// 20 ticks equal 1 second
 		getServer().getScheduler().runTaskTimer(this, new Runnable()
 		{
 			@Override
@@ -378,6 +396,16 @@ public class BlockHunt extends JavaPlugin implements Listener {
 				mainLoop();
 			}
 		}, 0, 20);
+
+		// 500ms执行一次The World的定时器
+		getServer().getScheduler().runTaskTimer(this, new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				theWorldLoop();
+			}
+		}, 0, 10);
 	}
 
 	public void onDisable() {
@@ -520,11 +548,21 @@ public class BlockHunt extends JavaPlugin implements Listener {
 	/*
 	 * The main loop
 	 */
-	@SuppressWarnings("deprecation")
 	private void mainLoop()
 	{
-		if(W.NameOffMode)
+		if(W.BattleMode)
 		{
+			for(Player pl : W.playerTobeRespawn)
+			{
+				// Respawn in random point
+				if(!W.battleField.spawnPoints.isEmpty())
+				{
+					LocationSerializable loc = W.battleField.spawnPoints.get( W.random.nextInt( W.battleField.spawnPoints.size() ) );
+					pl.teleport(loc);
+				}
+			}
+			W.playerTobeRespawn.clear();
+
 			for (Player pl : Bukkit
 					.getOnlinePlayers())
 			{
@@ -549,632 +587,727 @@ public class BlockHunt extends JavaPlugin implements Listener {
 
 		for (Arena arena : W.arenaList)
 		{
-			if (arena.gameState == ArenaState.WAITING)
+			perArenaLoop(arena);
+		}
+
+		SignsHandler.updateSigns();
+	}
+
+	private void perArenaLoop(Arena arena)
+	{
+		if (arena.gameState == ArenaState.WAITING)
+		{
+			if (arena.playersInArena.size() >= arena.minPlayers)
 			{
-				if (arena.playersInArena.size() >= arena.minPlayers)
-				{
-					arena.gameState = ArenaState.STARTING;
-					arena.timer = arena.timeInLobbyUntilStart;
-					ArenaHandler.sendFMessage(arena,
-							ConfigC.normal_lobbyArenaIsStarting, "1-"
-									+ arena.timeInLobbyUntilStart);
-				}
+				arena.gameState = ArenaState.STARTING;
+				arena.timer = arena.timeInLobbyUntilStart;
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_lobbyArenaIsStarting, "1-"
+								+ arena.timeInLobbyUntilStart);
 			}
-			else if (arena.gameState == ArenaState.STARTING)
+		}
+		else if (arena.gameState == ArenaState.STARTING)
+		{
+			arena.timer = arena.timer - 1;
+			if (arena.timer > 0)
 			{
-				arena.timer = arena.timer - 1;
-				if (arena.timer > 0)
+				processArenaStartingCountdown(arena);
+			}
+			else // InGame
+			{
+				processArenaStarting(arena);
+			}
+		}
+
+		processArenaSeekers(arena);
+
+		if (arena.gameState == ArenaState.INGAME)
+		{
+			processArenaInGame(arena);
+		}
+
+		for (Player pl : arena.playersInArena)
+		{
+			pl.setLevel(arena.timer);
+			pl.setGameMode(GameMode.SURVIVAL);
+		}
+
+		ScoreboardHandler.updateScoreboard(arena);
+	}
+
+	private void processArenaStartingCountdown(Arena arena)
+	{
+		if (arena.timer == 60)
+		{
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-60");
+		}
+		else if (arena.timer == 30)
+		{
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-30");
+		}
+		else if (arena.timer == 10)
+		{
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-10");
+		}
+		else if (arena.timer == 5)
+		{
+			for (Player pl : arena.playersInArena)
+			{
+				pl.playSound(pl.getLocation(),
+						Sound.ORB_PICKUP, 1, 0);
+			}
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-5");
+		}
+		else if (arena.timer == 4)
+		{
+			for (Player pl : arena.playersInArena)
+			{
+				pl.playSound(pl.getLocation(),
+						Sound.ORB_PICKUP, 1, 0);
+			}
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-4");
+		}
+		else if (arena.timer == 3)
+		{
+			for (Player pl : arena.playersInArena)
+			{
+				pl.playSound(pl.getLocation(),
+						Sound.ORB_PICKUP, 1, 1);
+			}
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-3");
+		}
+		else if (arena.timer == 2)
+		{
+			for (Player pl : arena.playersInArena)
+			{
+				pl.playSound(pl.getLocation(),
+						Sound.ORB_PICKUP, 1, 1);
+			}
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-2");
+		}
+		else if (arena.timer == 1)
+		{
+			if(arena.killScore != null)
+			{
+				arena.killScore.clear();
+			}
+
+			for (Player pl : arena.playersInArena)
+			{
+				pl.playSound(pl.getLocation(),
+						Sound.ORB_PICKUP, 1, 2);
+
+				// Init the Nyan cooldown
+				if (arena.nyanCooldown != null)
 				{
-					if (arena.timer == 60)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-60");
-					}
-					else if (arena.timer == 30)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-30");
-					}
-					else if (arena.timer == 10)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-10");
-					}
-					else if (arena.timer == 5)
-					{
-						for (Player pl : arena.playersInArena)
-						{
-							pl.playSound(pl.getLocation(),
-									Sound.ORB_PICKUP, 1, 0);
-						}
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-5");
-					}
-					else if (arena.timer == 4)
-					{
-						for (Player pl : arena.playersInArena)
-						{
-							pl.playSound(pl.getLocation(),
-									Sound.ORB_PICKUP, 1, 0);
-						}
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-4");
-					}
-					else if (arena.timer == 3)
-					{
-						for (Player pl : arena.playersInArena)
-						{
-							pl.playSound(pl.getLocation(),
-									Sound.ORB_PICKUP, 1, 1);
-						}
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-3");
-					}
-					else if (arena.timer == 2)
-					{
-						for (Player pl : arena.playersInArena)
-						{
-							pl.playSound(pl.getLocation(),
-									Sound.ORB_PICKUP, 1, 1);
-						}
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-2");
-					}
-					else if (arena.timer == 1)
-					{
-						if(arena.killScore != null)
-						{
-							arena.killScore.clear();
-						}
-
-						for (Player pl : arena.playersInArena)
-						{
-							pl.playSound(pl.getLocation(),
-									Sound.ORB_PICKUP, 1, 2);
-
-							// Init the Nyan cooldown
-							if (arena.nyanCooldown != null)
-							{
-								arena.nyanCooldown.put(
-										pl,
-										(Integer) W.config
-												.get(ConfigC.nyanCooldown));
-							}
-							
-							if(arena.killScore != null)
-							{
-								arena.killScore.put(pl, 0);
-							}
-						}
-
-						try
-						{
-							WorldPerformer.randomTheArena(arena.pos1.getWorld(), arena);
-						}
-						catch (Exception e)
-						{
-							e.printStackTrace();
-						}
-
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_lobbyArenaIsStarting,
-								"1-1");
-					}
+					arena.nyanCooldown.put(
+							pl,
+							(Integer) W.config
+									.get(ConfigC.nyanCooldown));
 				}
-				else // InGame
+
+				// Init the player's The World cooldown
+				if (arena.theWorldCooldown != null)
 				{
-					arena.gameState = ArenaState.INGAME;
-					arena.timer = arena.gameTime;
-					ArenaHandler.sendFMessage(arena,
-							ConfigC.normal_lobbyArenaStarted, "secs-"
-									+ arena.waitingTimeSeeker);
+					arena.theWorldCooldown.put(
+							pl, 0);
+				}
+				
+				if(arena.killScore != null)
+				{
+					arena.killScore.put(pl, 0);
+				}
 
-					for (int i = arena.amountSeekersOnStart; i > 0; i = i - 1)
+				arena.theWorldUser.put(pl, false);
+				arena.theWorldTime.put(pl, 0.0f);
+			}
+
+			try
+			{
+				WorldPerformer.randomTheArena(arena.pos1.getWorld(), arena);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+
+			ArenaHandler.sendFMessage(arena,
+					ConfigC.normal_lobbyArenaIsStarting,
+					"1-1");
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private void processArenaStarting(Arena arena)
+	{
+		arena.gameState = ArenaState.INGAME;
+		arena.timer = arena.gameTime;
+		ArenaHandler.sendFMessage(arena,
+				ConfigC.normal_lobbyArenaStarted, "secs-"
+						+ arena.waitingTimeSeeker);
+
+		for (int i = arena.amountSeekersOnStart; i > 0; i = i - 1)
+		{
+			boolean loop = true;
+			//Player seeker = arena.playersInArena
+			//		.get(W.random
+			//				.nextInt(arena.playersInArena
+			//						.size()));
+			Player seeker = arena.getRandomPlayer();
+
+			for (Player playerCheck : arena.playersInArena)
+			{
+				if (W.choosenSeeker.get(playerCheck) != null)
+				{
+					if (W.choosenSeeker.get(playerCheck) == true)
 					{
-						boolean loop = true;
-						//Player seeker = arena.playersInArena
-						//		.get(W.random
-						//				.nextInt(arena.playersInArena
-						//						.size()));
-						Player seeker = arena.getRandomPlayer();
-
-						for (Player playerCheck : arena.playersInArena)
-						{
-							if (W.choosenSeeker.get(playerCheck) != null)
-							{
-								if (W.choosenSeeker.get(playerCheck) == true)
-								{
-									seeker = playerCheck;
-									W.choosenSeeker.remove(playerCheck);
-								}
-								else
-								{
-									if (seeker.equals(playerCheck))
-									{
-										i = i + 1;
-										loop = false;
-									}
-								}
-							}
-						}
-
-						if (loop)
-						{
-							if (!arena.seekers.contains(seeker))
-							{
-								ArenaHandler
-										.sendFMessage(
-												arena,
-												ConfigC.normal_ingameSeekerChoosen,
-												"seeker-"
-														+ seeker.getName());
-								arena.seekers.add(seeker);
-								seeker.teleport(arena.seekersWarp);
-								seeker.getInventory().clear();
-								seeker.updateInventory();
-								W.seekertime.put(seeker,
-										arena.waitingTimeSeeker);
-							}
-							else
-							{
-								i = i + 1;
-							}
-						}
+						seeker = playerCheck;
+						W.choosenSeeker.remove(playerCheck);
 					}
-
-					for (Player arenaPlayer : arena.playersInArena)
+					else
 					{
-						if (!arena.seekers.contains(arenaPlayer))
+						if (seeker.equals(playerCheck))
 						{
-							arenaPlayer.getInventory().clear();
-							arenaPlayer.updateInventory();
-							ItemStack block = arena.disguiseBlocks.get(W.random
-									.nextInt(arena.disguiseBlocks
-											.size()));
-
-							if (W.choosenBlock.get(arenaPlayer) != null)
-							{
-								block = W.choosenBlock.get(arenaPlayer);
-								W.choosenBlock.remove(arenaPlayer);
-							}
-
-							if (DisguiseDelegate.GetSingleton().IsMobDisguise(block))
-							{
-//								MobDisguise mobDisguise = new MobDisguise(
-//										Common.GetDisguiseType(block),
-//										true,
-//										true);
-//								DisguiseAPI.disguiseToAll(arenaPlayer,
-//										mobDisguise);
-								DisguiseDelegate.GetSingleton().Disguise(arenaPlayer,
-										DisguiseDelegate.DISGUISE_TYPE.TYPE_MOB,
-										block);
-							}
-							else
-							{
-//								MiscDisguise disguise = new MiscDisguise(
-//										DisguiseType.FALLING_BLOCK,
-//										block.getTypeId(), block
-//												.getDurability());
-//								DisguiseAPI.disguiseToAll(arenaPlayer,
-//										disguise);
-								DisguiseDelegate.GetSingleton().Disguise(arenaPlayer,
-										DisguiseDelegate.DISGUISE_TYPE.TYPE_FALLING_BLOCK,
-										block);
-							}
-
-							arenaPlayer.teleport(arena.hidersWarp);
-
-							ItemStack blockCount = new ItemStack(block
-									.getType(), 5);
-							blockCount.setDurability(block
-									.getDurability());
-							arenaPlayer.getInventory().setItem(8,
-									blockCount);
-							arenaPlayer.getInventory().setHelmet(
-									new ItemStack(block));
-							W.pBlock.put(arenaPlayer, block);
-
-							if (block.getDurability() != 0)
-							{
-								MessageM.sendFMessage(
-										arenaPlayer,
-										ConfigC.normal_ingameBlock,
-										"block-"
-												+ block.getType()
-														.name()
-														.replaceAll(
-																"_", "")
-														.replaceAll(
-																"BLOCK",
-																"")
-														.toLowerCase()
-												+ ":"
-												+ block.getDurability());
-							}
-							else
-							{
-								MessageM.sendFMessage(
-										arenaPlayer,
-										ConfigC.normal_ingameBlock,
-										"block-"
-												+ block.getType()
-														.name()
-														.replaceAll(
-																"_", "")
-														.replaceAll(
-																"BLOCK",
-																"")
-														.toLowerCase());
-							}
+							i = i + 1;
+							loop = false;
 						}
 					}
 				}
 			}
 
-			for (Player player : arena.seekers)
+			if (loop)
 			{
-				if (player.getInventory().getItem(0) == null
-						|| player.getInventory().getItem(0).getType() != Common.SeekerWeapon)
+				if (!arena.seekers.contains(seeker))
 				{
-					player.getInventory().setItem(0,
-							new ItemStack(Common.SeekerWeapon, 1));
-					player.getInventory().setItem(1,
-							new ItemStack(Material.BOW, 1));
-					player.getInventory().setItem(2,
-							new ItemStack(Material.ARROW,
-									(int) W.config.get(ConfigC.seekerArrowNumber)));
-					player.getInventory().setHelmet(
-							new ItemStack(Material.IRON_HELMET, 1));
-					player.getInventory().setChestplate(
-							new ItemStack(Material.DIAMOND_CHESTPLATE,
-									1));
-					player.getInventory().setLeggings(
-							new ItemStack(Material.IRON_LEGGINGS, 1));
-					player.getInventory().setBoots(
-							new ItemStack(Material.IRON_BOOTS, 1));
-					player.playSound(player.getLocation(),
-							Sound.ANVIL_USE, 1, 1);
-				}
-
-				if (W.seekertime.get(player) != null)
-				{
-					W.seekertime.put(player,
-							W.seekertime.get(player) - 1);
-					if (W.seekertime.get(player) <= 0)
-					{
-						player.teleport(arena.hidersWarp);
-						W.seekertime.remove(player);
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameSeekerSpawned,
-								"playername-" + player.getName());
-					}
-				}
-			}
-
-			if (arena.gameState == ArenaState.INGAME)
-			{
-				arena.timer = arena.timer - 1;
-				if (arena.timer > 0)
-				{
-					if (arena.timer == arena.gameTime
-							- arena.timeUntilHidersSword)
-					{
-						ItemStack sword = new ItemStack(
-								Material.WOOD_SWORD, 1);
-						sword.addUnsafeEnchantment(
-								Enchantment.KNOCKBACK, 1);
-						ItemStack bow = new ItemStack(Material.BOW, 1);
-						bow.addUnsafeEnchantment(
-								Enchantment.ARROW_DAMAGE,
-								(int) W.config
-										.get(ConfigC.arrowDamageLevel));
-						ItemStack arrow = new ItemStack(Material.ARROW,
-								(int) W.config.get(ConfigC.arrowNumber));
-						ItemStack sugar = new ItemStack(Material.SUGAR,
-								1);
-						ItemStack firework = new ItemStack(
-								Material.FIREWORK, 5);
-						FireworkMeta fm = (FireworkMeta) firework
-								.getItemMeta();
-						fm.addEffect(FireworkEffect.builder()
-								.flicker(true).trail(true)
-								.with(FireworkEffect.Type.BALL_LARGE)
-								.withColor(Color.YELLOW).build());
-						fm.setPower(3);
-						firework.setItemMeta(fm);
-						for (Player arenaPlayer : arena.playersInArena)
-						{
-							if (!arena.seekers.contains(arenaPlayer))
-							{
-								arenaPlayer.getInventory().addItem(
-										sword);
-								arenaPlayer.getInventory().addItem(bow);
-								arenaPlayer.getInventory().addItem(
-										arrow);
-								arenaPlayer.getInventory().addItem(
-										sugar);
-								arenaPlayer.getInventory().addItem(
-										firework);
-								arenaPlayer.setFoodLevel(10);
-								MessageM.sendFMessage(arenaPlayer,
-										ConfigC.normal_ingameGivenSword);
-							}
-						}
-					}
-					if (arena.timer == 190)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-190");
-					}
-					else if (arena.timer == 60)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-60");
-					}
-					else if (arena.timer == 30)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-30");
-					}
-					else if (arena.timer == 10)
-					{
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-10");
-					}
-					else if (arena.timer == 5)
-					{
-						arena.lobbyWarp.getWorld()
-								.playSound(arena.lobbyWarp,
-										Sound.ORB_PICKUP, 1, 0);
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-5");
-					}
-					else if (arena.timer == 4)
-					{
-						arena.lobbyWarp.getWorld()
-								.playSound(arena.lobbyWarp,
-										Sound.ORB_PICKUP, 1, 0);
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-4");
-					}
-					else if (arena.timer == 3)
-					{
-						arena.lobbyWarp.getWorld()
-								.playSound(arena.lobbyWarp,
-										Sound.ORB_PICKUP, 1, 1);
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-3");
-					}
-					else if (arena.timer == 2)
-					{
-						arena.lobbyWarp.getWorld()
-								.playSound(arena.lobbyWarp,
-										Sound.ORB_PICKUP, 1, 1);
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-2");
-					}
-					else if (arena.timer == 1)
-					{
-						arena.lobbyWarp.getWorld()
-								.playSound(arena.lobbyWarp,
-										Sound.ORB_PICKUP, 1, 2);
-						ArenaHandler.sendFMessage(arena,
-								ConfigC.normal_ingameArenaEnd, "1-1");
-					}
+					ArenaHandler
+							.sendFMessage(
+									arena,
+									ConfigC.normal_ingameSeekerChoosen,
+									"seeker-"
+											+ seeker.getName());
+					arena.seekers.add(seeker);
+					seeker.teleport(arena.seekersWarp);
+					seeker.getInventory().clear();
+					seeker.updateInventory();
+					W.seekertime.put(seeker,
+							arena.waitingTimeSeeker);
 				}
 				else
 				{
-					ArenaHandler.hidersWin(arena);
-					return;
+					i = i + 1;
+				}
+			}
+		}
+
+		for (Player arenaPlayer : arena.playersInArena)
+		{
+			if (!arena.seekers.contains(arenaPlayer))
+			{
+				arenaPlayer.getInventory().clear();
+				arenaPlayer.updateInventory();
+				ItemStack block = arena.disguiseBlocks.get(W.random
+						.nextInt(arena.disguiseBlocks
+								.size()));
+
+				if (W.choosenBlock.get(arenaPlayer) != null)
+				{
+					block = W.choosenBlock.get(arenaPlayer);
+					W.choosenBlock.remove(arenaPlayer);
 				}
 
-				for (Player player : arena.playersInArena)
+				if (DisguiseDelegate.GetSingleton().IsMobDisguise(block))
 				{
-					// cooldown the Nyan
-					if (arena.nyanCooldown != null)
+//					MobDisguise mobDisguise = new MobDisguise(
+//							Common.GetDisguiseType(block),
+//							true,
+//							true);
+//					DisguiseAPI.disguiseToAll(arenaPlayer,
+//							mobDisguise);
+					DisguiseDelegate.GetSingleton().Disguise(arenaPlayer,
+							DisguiseDelegate.DISGUISE_TYPE.TYPE_MOB,
+							block);
+				}
+				else
+				{
+//					MiscDisguise disguise = new MiscDisguise(
+//							DisguiseType.FALLING_BLOCK,
+//							block.getTypeId(), block
+//									.getDurability());
+//					DisguiseAPI.disguiseToAll(arenaPlayer,
+//							disguise);
+					DisguiseDelegate.GetSingleton().Disguise(arenaPlayer,
+							DisguiseDelegate.DISGUISE_TYPE.TYPE_FALLING_BLOCK,
+							block);
+				}
+
+				arenaPlayer.teleport(arena.hidersWarp);
+
+				ItemStack blockCount = new ItemStack(block
+						.getType(), 5);
+				blockCount.setDurability(block
+						.getDurability());
+				arenaPlayer.getInventory().setItem(8,
+						blockCount);
+				arenaPlayer.getInventory().setHelmet(
+						new ItemStack(block));
+				W.pBlock.put(arenaPlayer, block);
+
+				if (block.getDurability() != 0)
+				{
+					MessageM.sendFMessage(
+							arenaPlayer,
+							ConfigC.normal_ingameBlock,
+							"block-"
+									+ block.getType()
+											.name()
+											.replaceAll(
+													"_", "")
+											.replaceAll(
+													"BLOCK",
+													"")
+											.toLowerCase()
+									+ ":"
+									+ block.getDurability());
+				}
+				else
+				{
+					MessageM.sendFMessage(
+							arenaPlayer,
+							ConfigC.normal_ingameBlock,
+							"block-"
+									+ block.getType()
+											.name()
+											.replaceAll(
+													"_", "")
+											.replaceAll(
+													"BLOCK",
+													"")
+											.toLowerCase());
+				}
+			}
+		}
+	}
+
+	private void processArenaSeekers(Arena arena)
+	{
+		for (Player player : arena.seekers)
+		{
+			if (player.getInventory().getItem(0) == null
+					|| player.getInventory().getItem(0).getType() != Common.SeekerWeapon)
+			{
+				player.getInventory().setItem(0,
+						new ItemStack(Common.SeekerWeapon, 1));
+				player.getInventory().setItem(1,
+						new ItemStack(Material.BOW, 1));
+				player.getInventory().setItem(2,
+						new ItemStack(Material.ARROW,
+								(int) W.config.get(ConfigC.seekerArrowNumber)));
+
+				if(W.TheStandMode)
+				{
+					player.getInventory().setItem(3,
+							new ItemStack(Material.WATCH, 1));
+				}
+
+				player.getInventory().setHelmet(
+						new ItemStack(Material.IRON_HELMET, 1));
+				player.getInventory().setChestplate(
+						new ItemStack(Material.DIAMOND_CHESTPLATE,
+								1));
+				player.getInventory().setLeggings(
+						new ItemStack(Material.IRON_LEGGINGS, 1));
+				player.getInventory().setBoots(
+						new ItemStack(Material.IRON_BOOTS, 1));
+				player.playSound(player.getLocation(),
+						Sound.ANVIL_USE, 1, 1);
+			}
+
+			if (W.seekertime.get(player) != null)
+			{
+				W.seekertime.put(player,
+						W.seekertime.get(player) - 1);
+				if (W.seekertime.get(player) <= 0)
+				{
+					player.teleport(arena.hidersWarp);
+					W.seekertime.remove(player);
+					ArenaHandler.sendFMessage(arena,
+							ConfigC.normal_ingameSeekerSpawned,
+							"playername-" + player.getName());
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private void processArenaInGame(Arena arena)
+	{
+		arena.timer = arena.timer - 1;
+		if (arena.timer > 0)
+		{
+			if (arena.timer == arena.gameTime
+					- arena.timeUntilHidersSword)
+			{
+				ItemStack sword = new ItemStack(
+						Material.WOOD_SWORD, 1);
+				sword.addUnsafeEnchantment(
+						Enchantment.KNOCKBACK, 1);
+				ItemStack bow = new ItemStack(Material.BOW, 1);
+				bow.addUnsafeEnchantment(
+						Enchantment.ARROW_DAMAGE,
+						(int) W.config
+								.get(ConfigC.arrowDamageLevel));
+				ItemStack arrow = new ItemStack(Material.ARROW,
+						(int) W.config.get(ConfigC.arrowNumber));
+				ItemStack sugar = new ItemStack(Material.SUGAR,
+						1);
+				ItemStack firework = new ItemStack(
+						Material.FIREWORK, 5);
+				FireworkMeta fm = (FireworkMeta) firework
+						.getItemMeta();
+				fm.addEffect(FireworkEffect.builder()
+						.flicker(true).trail(true)
+						.with(FireworkEffect.Type.BALL_LARGE)
+						.withColor(Color.YELLOW).build());
+				fm.setPower(3);
+				firework.setItemMeta(fm);
+				for (Player arenaPlayer : arena.playersInArena)
+				{
+					if (!arena.seekers.contains(arenaPlayer))
 					{
-						if (arena.nyanCooldown.containsKey(player))
+						arenaPlayer.getInventory().addItem(
+								sword);
+						arenaPlayer.getInventory().addItem(bow);
+						arenaPlayer.getInventory().addItem(
+								arrow);
+						arenaPlayer.getInventory().addItem(
+								sugar);
+						arenaPlayer.getInventory().addItem(
+								firework);
+
+						if(W.TheStandMode)
 						{
-							int cd = arena.nyanCooldown.get(player);
-							cd--;
-							if (cd < 0)
-							{
-								cd = 0;
-							}
-							arena.nyanCooldown.put(player, cd);
+							arenaPlayer.getInventory().addItem( new ItemStack(Material.WATCH, 1) );
 						}
+
+						arenaPlayer.setFoodLevel(10);
+						MessageM.sendFMessage(arenaPlayer,
+								ConfigC.normal_ingameGivenSword);
 					}
+				}
+			}
+			if (arena.timer == 190)
+			{
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-190");
+			}
+			else if (arena.timer == 60)
+			{
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-60");
+			}
+			else if (arena.timer == 30)
+			{
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-30");
+			}
+			else if (arena.timer == 10)
+			{
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-10");
+			}
+			else if (arena.timer == 5)
+			{
+				arena.lobbyWarp.getWorld()
+						.playSound(arena.lobbyWarp,
+								Sound.ORB_PICKUP, 1, 0);
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-5");
+			}
+			else if (arena.timer == 4)
+			{
+				arena.lobbyWarp.getWorld()
+						.playSound(arena.lobbyWarp,
+								Sound.ORB_PICKUP, 1, 0);
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-4");
+			}
+			else if (arena.timer == 3)
+			{
+				arena.lobbyWarp.getWorld()
+						.playSound(arena.lobbyWarp,
+								Sound.ORB_PICKUP, 1, 1);
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-3");
+			}
+			else if (arena.timer == 2)
+			{
+				arena.lobbyWarp.getWorld()
+						.playSound(arena.lobbyWarp,
+								Sound.ORB_PICKUP, 1, 1);
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-2");
+			}
+			else if (arena.timer == 1)
+			{
+				arena.lobbyWarp.getWorld()
+						.playSound(arena.lobbyWarp,
+								Sound.ORB_PICKUP, 1, 2);
+				ArenaHandler.sendFMessage(arena,
+						ConfigC.normal_ingameArenaEnd, "1-1");
+			}
+		}
+		else
+		{
+			ArenaHandler.hidersWin(arena);
+			return;
+		}
 
-					// cooldown seeker's sword
-					if (arena.seekers.contains(player))
+		for (Player player : arena.playersInArena)
+		{
+			// cooldown the Nyan
+			if (arena.nyanCooldown != null)
+			{
+				if (arena.nyanCooldown.containsKey(player))
+				{
+					int cd = arena.nyanCooldown.get(player);
+					cd--;
+					if (cd < 0)
 					{
-						float exp = player.getExp();
-						exp += Common.SWORD_COOLDOWN_PER_SEC;
-						if (exp >= 1.0f)
-						{
-							exp = 0.9f;
-						}
-						player.setExp(exp);
+						cd = 0;
 					}
-
-					if (!arena.seekers.contains(player))
+					arena.nyanCooldown.put(player, cd);
+				}
+			}
+			
+			// cooldown The World
+			if(arena.theWorldCooldown != null)
+			{
+				if(arena.theWorldCooldown.containsKey(player))
+				{
+					int cd = arena.theWorldCooldown.get(player);
+					cd--;
+					if (cd < 0)
 					{
-						Location pLoc = player.getLocation();
-						Location moveLoc = W.moveLoc.get(player);
-						ItemStack block = player.getInventory()
-								.getItem(8);
+						cd = 0;
+					}
+					arena.theWorldCooldown.put(player, cd);
+				}
+			}
 
-						if (block == null)
+			// cooldown seeker's sword
+			if (arena.seekers.contains(player))
+			{
+				float exp = player.getExp();
+				exp += Common.SWORD_COOLDOWN_PER_SEC;
+				if (exp >= 1.0f)
+				{
+					exp = 0.9f;
+				}
+				player.setExp(exp);
+			}
+
+			if (!arena.seekers.contains(player))
+			{
+				Location pLoc = player.getLocation();
+				Location moveLoc = W.moveLoc.get(player);
+				ItemStack block = player.getInventory()
+						.getItem(8);
+
+				if (block == null)
+				{
+					if (W.pBlock.get(player) != null)
+					{
+						block = W.pBlock.get(player);
+						player.getInventory().setItem(8, block);
+						player.updateInventory();
+					}
+					else
+					{
+						MessageM.broadcastMessage("Init block error,please contact the authour");
+					}
+				}
+
+				if (moveLoc != null
+						&& !DisguiseDelegate.GetSingleton().IsMobDisguise(block))
+				{
+					if (moveLoc.getX() == pLoc.getX()
+							&& moveLoc.getY() == pLoc.getY()
+							&& moveLoc.getZ() == pLoc.getZ())
+					{
+						if (block.getAmount() > 1)
 						{
-							if (W.pBlock.get(player) != null)
-							{
-								block = W.pBlock.get(player);
-								player.getInventory().setItem(8, block);
-								player.updateInventory();
-							}
-							else
-							{
-								MessageM.broadcastMessage("Init block error,please contact the author");
-							}
+							block.setAmount(block.getAmount() - 1);
 						}
-
-						if (moveLoc != null
-								&& !DisguiseDelegate.GetSingleton().IsMobDisguise(block))
+						else
 						{
-							if (moveLoc.getX() == pLoc.getX()
-									&& moveLoc.getY() == pLoc.getY()
-									&& moveLoc.getZ() == pLoc.getZ())
+							Block pBlock = player.getLocation()
+									.getBlock();
+							if (pBlock.getType().equals(
+									Material.AIR)
+									|| pBlock.getType().equals(
+											Material.WATER)
+									|| pBlock
+											.getType()
+											.equals(Material.STATIONARY_WATER))
 							{
-								if (block.getAmount() > 1)
+								if (pBlock.getType().equals(
+										Material.WATER)
+										|| pBlock
+												.getType()
+												.equals(Material.STATIONARY_WATER))
 								{
-									block.setAmount(block.getAmount() - 1);
+									W.hiddenLocWater.put(
+											player, true);
 								}
 								else
 								{
-									Block pBlock = player.getLocation()
-											.getBlock();
-									if (pBlock.getType().equals(
-											Material.AIR)
-											|| pBlock.getType().equals(
-													Material.WATER)
-											|| pBlock
-													.getType()
-													.equals(Material.STATIONARY_WATER))
+									W.hiddenLocWater.put(
+											player, false);
+								}
+
+								//if (DisguiseAPI.isDisguised(player))
+								if (DisguiseDelegate.GetSingleton().IsDisguised(player))
+								{
+									//DisguiseAPI.undisguiseToAll(player);
+									DisguiseDelegate.GetSingleton().UnDisguise(player);
+									for (Player pl : Bukkit
+											.getOnlinePlayers())
 									{
-										if (pBlock.getType().equals(
-												Material.WATER)
-												|| pBlock
-														.getType()
-														.equals(Material.STATIONARY_WATER))
+										if (!pl.equals(player))
 										{
-											W.hiddenLocWater.put(
-													player, true);
+											pl.hidePlayer(player);
+											pl.sendBlockChange(
+													pBlock.getLocation(),
+													block.getType(),
+													(byte) block
+															.getDurability());
 										}
-										else
-										{
-											W.hiddenLocWater.put(
-													player, false);
-										}
+									}
 
-										//if (DisguiseAPI.isDisguised(player))
-										if (DisguiseDelegate.GetSingleton().IsDisguised(player))
-										{
-											//DisguiseAPI.undisguiseToAll(player);
-											DisguiseDelegate.GetSingleton().UnDisguise(player);
-											for (Player pl : Bukkit
-													.getOnlinePlayers())
-											{
-												if (!pl.equals(player))
-												{
-													pl.hidePlayer(player);
-													pl.sendBlockChange(
-															pBlock.getLocation(),
-															block.getType(),
-															(byte) block
-																	.getDurability());
-												}
-											}
-
-											block.addUnsafeEnchantment(
-													Enchantment.DURABILITY,
-													10);
-											player.playSound(pLoc,
-													Sound.ORB_PICKUP,
-													1, 1);
-											W.hiddenLoc.put(player,
-													moveLoc);
-											if (block.getDurability() != 0)
-											{
-												MessageM.sendFMessage(
-														player,
-														ConfigC.normal_ingameNowSolid,
-														"block-"
-																+ block.getType()
-																		.name()
-																		.replaceAll(
-																				"_",
-																				"")
-																		.replaceAll(
-																				"BLOCK",
-																				"")
-																		.toLowerCase()
-																+ ":"
-																+ block.getDurability());
-											}
-											else
-											{
-												MessageM.sendFMessage(
-														player,
-														ConfigC.normal_ingameNowSolid,
-														"block-"
-																+ block.getType()
-																		.name()
-																		.replaceAll(
-																				"_",
-																				"")
-																		.replaceAll(
-																				"BLOCK",
-																				"")
-																		.toLowerCase());
-											}
-										}
-										for (Player pl : Bukkit
-												.getOnlinePlayers())
-										{
-											if (!pl.equals(player))
-											{
-												pl.hidePlayer(player);
-												pl.sendBlockChange(
-														pBlock.getLocation(),
-														block.getType(),
-														(byte) block
-																.getDurability());
-											}
-										}
+									block.addUnsafeEnchantment(
+											Enchantment.DURABILITY,
+											10);
+									player.playSound(pLoc,
+											Sound.ORB_PICKUP,
+											1, 1);
+									W.hiddenLoc.put(player,
+											moveLoc);
+									if (block.getDurability() != 0)
+									{
+										MessageM.sendFMessage(
+												player,
+												ConfigC.normal_ingameNowSolid,
+												"block-"
+														+ block.getType()
+																.name()
+																.replaceAll(
+																		"_",
+																		"")
+																.replaceAll(
+																		"BLOCK",
+																		"")
+																.toLowerCase()
+														+ ":"
+														+ block.getDurability());
 									}
 									else
 									{
 										MessageM.sendFMessage(
 												player,
-												ConfigC.warning_ingameNoSolidPlace);
+												ConfigC.normal_ingameNowSolid,
+												"block-"
+														+ block.getType()
+																.name()
+																.replaceAll(
+																		"_",
+																		"")
+																.replaceAll(
+																		"BLOCK",
+																		"")
+																.toLowerCase());
+									}
+								}
+								for (Player pl : Bukkit
+										.getOnlinePlayers())
+								{
+									if (!pl.equals(player))
+									{
+										pl.hidePlayer(player);
+										pl.sendBlockChange(
+												pBlock.getLocation(),
+												block.getType(),
+												(byte) block
+														.getDurability());
 									}
 								}
 							}
 							else
 							{
-								if (block != null)
+								MessageM.sendFMessage(
+										player,
+										ConfigC.warning_ingameNoSolidPlace);
+							}
+						}
+					}
+					else
+					{
+						if (block != null)
+						{
+							block.setAmount(5);
+						}
+						//if (!DisguiseAPI.isDisguised(player))
+						if (!DisguiseDelegate.GetSingleton().IsDisguised(player))
+						{
+							SolidBlockHandler
+									.makePlayerUnsolid(player);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private void theWorldLoop()
+	{
+		if(W.TheStandMode)
+		{
+			for (Arena arena : W.arenaList)
+			{
+				if (arena.gameState == ArenaState.INGAME)
+				{
+					for (Player player : arena.playersInArena)
+					{
+						// cooldown The World time
+						if (arena.theWorldTime != null)
+						{
+							if (arena.theWorldTime.containsKey(player))
+							{
+								float time = arena.theWorldTime.get(player);
+								time -= 0.5f;
+								if (time < 0.0f)
 								{
-									block.setAmount(5);
+									time = 0.0f;
 								}
-								//if (!DisguiseAPI.isDisguised(player))
-								if (!DisguiseDelegate.GetSingleton().IsDisguised(player))
-								{
-									SolidBlockHandler
-											.makePlayerUnsolid(player);
-								}
+								arena.theWorldTime.put(player, time);
 							}
 						}
 					}
 				}
 			}
-
-			for (Player pl : arena.playersInArena)
-			{
-				pl.setLevel(arena.timer);
-				pl.setGameMode(GameMode.SURVIVAL);
-			}
-
-			ScoreboardHandler.updateScoreboard(arena);
 		}
-
-		SignsHandler.updateSigns();
 	}
 }

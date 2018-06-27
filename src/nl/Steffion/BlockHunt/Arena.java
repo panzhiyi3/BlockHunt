@@ -49,6 +49,10 @@ public class Arena implements ConfigurationSerializable {
 	public Map<Player, Integer> nyanCooldown = new HashMap<Player, Integer>();
 	public Map<Player, Integer> killScore = new HashMap<Player, Integer>();
 
+	public Map<Player, Integer> theWorldCooldown = new HashMap<Player, Integer>();
+	public Map<Player, Boolean> theWorldUser = new HashMap<Player, Boolean>();
+	public Map<Player, Float> theWorldTime = new HashMap<Player, Float>();
+
 	public Arena (String arenaName, LocationSerializable pos1,
 			LocationSerializable pos2,
 			List<LocationSerializable> singularPoints,
@@ -93,7 +97,8 @@ public class Arena implements ConfigurationSerializable {
 		this.scoreboard = scoreboard;
 	}
 
-	public enum ArenaType {
+	public enum ArenaType
+	{
 		maxPlayers,
 		minPlayers,
 		amountSeekersOnStart,
@@ -106,12 +111,14 @@ public class Arena implements ConfigurationSerializable {
 		killTokens;
 	}
 
-	public enum ArenaState {
+	public enum ArenaState
+	{
 		WAITING, STARTING, INGAME, RESTARTING, DISABLED;
 	}
 
 	@Override
-	public Map<String, Object> serialize() {
+	public Map<String, Object> serialize()
+	{
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("arenaName", arenaName);
 		map.put("pos1", pos1);

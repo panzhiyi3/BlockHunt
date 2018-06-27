@@ -7,7 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-public class PlayerArenaData {
+public class PlayerArenaData
+{
 	public GameMode pGameMode;
 	public ItemStack[] pInventory;
 	public ItemStack[] pArmor;
@@ -21,7 +22,8 @@ public class PlayerArenaData {
 	public PlayerArenaData (Location pLocation, GameMode pGameMode,
 			ItemStack[] pInventory, ItemStack[] pArmor, Float pEXP,
 			Integer pEXPL, Double pHealth, Integer pFood,
-			Collection<PotionEffect> pPotionEffects, boolean pFlying) {
+			Collection<PotionEffect> pPotionEffects, boolean pFlying)
+{
 		this.pGameMode = pGameMode;
 		this.pInventory = pInventory;
 		this.pArmor = pArmor;

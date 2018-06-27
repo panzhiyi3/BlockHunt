@@ -18,6 +18,7 @@ import nl.Steffion.BlockHunt.Serializables.LocationSerializable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -50,6 +51,27 @@ public class OnPlayerInteractEvent implements Listener
 		Player player = event.getPlayer();
 		Block block = event.getClickedBlock();
 
+		if(W.TheStandMode)
+		{
+			for (Arena arena : W.arenaList)
+			{
+				if (arena.playersInArena.contains(player)
+						&& arena.gameState.equals(ArenaState.INGAME))
+				{
+					if(arena.theWorldTime.containsKey(player))
+					{
+						float value = (float) arena.theWorldTime.get(player);
+						if(value > 0.0f)
+						{
+							event.setCancelled(true);
+							return;
+						}
+						break;
+					}
+				}
+			}
+		}
+
 		if (player != null && PermissionsM.hasPerm(player, Permissions.create, false))
 		{
 			processWandEvent(event, player, block);
@@ -79,6 +101,18 @@ public class OnPlayerInteractEvent implements Listener
 						.equals(Material.SUGAR))
 		{
 			processNyanSugar(player);
+		}
+
+		if(W.TheStandMode)
+		{
+			// Use The World
+			if (player != null
+					&& player.getInventory().getItemInHand() != null
+					&& player.getInventory().getItemInHand().getType()
+							.equals(Material.WATCH))
+			{
+				processTheWorld(player);
+			}
 		}
 
 		// Use fireworks
@@ -499,6 +533,94 @@ public class OnPlayerInteractEvent implements Listener
 		}
 	}
 	
+	private void processTheWorld(Player player)
+	{
+		for (Arena arena : W.arenaList)
+		{
+			if (arena.playersInArena.contains(player)
+					&& arena.gameState.equals(ArenaState.INGAME))
+			{
+				if(arena.theWorldCooldown.containsKey(player))
+				{
+					int cd = arena.theWorldCooldown.get(player);
+					player.sendMessage("The World冷却时间剩余：" + cd + "秒");
+					if(cd > 0)
+					{
+						return; // CD还没好
+					}
+				}
+				if(arena.theWorldTime.containsKey(player))
+				{
+					float time = arena.theWorldTime.get(player);
+					if(time > 0.0f)
+					{
+						return; // 被The World影响的人不能释放The World
+					}
+				}
+
+				boolean isHider = true;
+				if(arena.seekers.contains(player))
+				{
+					isHider = false;
+				}
+
+				// 确认可以发动The World了
+				if(!isHider)
+				{
+					arena.theWorldCooldown.put(
+							player,
+							(Integer) W.config
+									.get(ConfigC.theWorldCooldownSeeker));
+				}
+				else
+				{
+					arena.theWorldCooldown.put(
+							player,
+							(Integer) W.config
+									.get(ConfigC.theWorldCooldownHider));
+				}
+
+				// 执行效果
+				Location locPlayer = player.getLocation();
+				for(Player victim: arena.playersInArena)
+				{
+					if(victim == player)
+						continue;
+
+					// 寻找射程范围内的玩家
+					Location locVictim = victim.getLocation();
+					float dist = 9999.0f;
+					try
+					{
+						if(locPlayer.getWorld() == locVictim.getWorld())
+							dist = (float) locPlayer.distance(locVictim);
+					}
+					finally
+					{
+					}
+					int range = (int) W.config.get(ConfigC.theWorldRange);
+					if( range >= dist )
+					{
+						Double value;
+						if(isHider)
+							value = (Double) W.config.get(ConfigC.theWorldTimeHider);
+						else
+							value = (Double) W.config.get(ConfigC.theWorldTimeSeeker);
+						arena.theWorldTime.put(victim, value.floatValue());
+
+						victim.playEffect(locVictim, Effect.ENDER_SIGNAL, null);
+						victim.playSound(locVictim, Sound.GHAST_FIREBALL, 1, 1);
+						victim.playSound(locVictim, Sound.ENDERMAN_DEATH, 1, 1);
+					}
+				}
+				
+				player.playEffect(locPlayer, Effect.ENDER_SIGNAL, null);
+				player.playSound(locPlayer, Sound.GHAST_FIREBALL, 1, 1);
+				player.playSound(locPlayer, Sound.ENDERMAN_DEATH, 1, 1);
+			}
+		}
+	}
+	
 	private void processFirework(PlayerInteractEvent event, Player player, Block block)
 	{
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK
@@ -521,6 +643,15 @@ public class OnPlayerInteractEvent implements Listener
 	{
 		if (player.getItemInHand().getType() == Common.SeekerWeapon)
 		{
+			if (W.seekertime.get(player) != null)
+			{
+				if (W.seekertime.get(player) > 0)
+				{
+					// seeker还未被刷新时，不扣学，防止自杀直接进图抓人
+					return;
+				}
+			}
+
 			for (Arena arena : W.arenaList)
 			{
 				if (arena.playersInArena.contains(player)

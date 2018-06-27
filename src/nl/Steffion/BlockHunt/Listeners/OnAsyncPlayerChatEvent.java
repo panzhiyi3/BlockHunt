@@ -19,26 +19,27 @@ public class OnAsyncPlayerChatEvent implements Listener
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event)
 	{
-		Player pl = event.getPlayer();
-		if(pl != null)
-		{
-			for (Arena arena : W.arenaList)
-			{
-				if (arena.gameState == Arena.ArenaState.INGAME
-						&& arena.playersInArena.contains(pl)
-						&& !arena.seekers.contains(pl))
-				{
-					String msg = event.getMessage();
-					if(msg.contains("我无敌")
-							|| msg.contains("我已经无敌"))
-					{
-						MessageM.broadcastMessage(pl.getName() + " 声称他已经无敌! 躲猫猫之神悄悄告诉大家," + getPlayerHideTips(pl));
-					}
-
-					break;
-				}
-			}
-		}
+		//功能效果太差，取消
+//		Player pl = event.getPlayer();
+//		if(pl != null)
+//		{
+//			for (Arena arena : W.arenaList)
+//			{
+//				if (arena.gameState == Arena.ArenaState.INGAME
+//						&& arena.playersInArena.contains(pl)
+//						&& !arena.seekers.contains(pl))
+//				{
+//					String msg = event.getMessage();
+//					if(msg.contains("我无敌")
+//							|| msg.contains("我已经无敌"))
+//					{
+//						MessageM.broadcastMessage(pl.getName() + " 声称他已经无敌! 躲猫猫之神悄悄告诉大家," + getPlayerHideTips(pl));
+//					}
+//
+//					break;
+//				}
+//			}
+//		}
 	}
 	
 	private String getPlayerHideTips(Player player)

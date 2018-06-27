@@ -39,6 +39,7 @@ public class W {
 	public static ConfigM arenas = new ConfigM("arenas");
 	public static ConfigM signs = new ConfigM("signs");
 	public static ConfigM shop = new ConfigM("shop");
+	public static ConfigM battlefieldCfg = new ConfigM("battlefield");
 
 	/*
 	 * Add any variable you need in different classes here:
@@ -48,6 +49,7 @@ public class W {
 	public static HashMap<Player, LocationSerializable> pos2 = new HashMap<Player, LocationSerializable>();
 	public static HashMap<Player, LocationSerializable> singularPos = new HashMap<Player, LocationSerializable>();
 
+	public static BattleField battleField = new BattleField(new ArrayList<LocationSerializable>());
 	public static ArrayList<Arena> arenaList = new ArrayList<Arena>();
 	public static Random random = new Random();
 	public static HashMap<Player, Integer> seekertime = new HashMap<Player, Integer>();
@@ -61,5 +63,9 @@ public class W {
 	public static HashMap<Player, Location> hiddenLoc = new HashMap<Player, Location>();
 	public static HashMap<Player, Boolean> hiddenLocWater = new HashMap<Player, Boolean>();
 
-	public static boolean NameOffMode = false;
+	public static ArrayList<Player> playerTobeRespawn = new ArrayList<Player>();
+
+	public static boolean BattleMode = false;
+
+	public static boolean TheStandMode = true; // JOJOÌæÉíÄ£Ê½
 }

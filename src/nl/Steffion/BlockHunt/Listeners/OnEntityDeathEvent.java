@@ -27,6 +27,14 @@ public class OnEntityDeathEvent implements Listener
 						event.getDrops().clear();
 						event.setDroppedExp(0);
 					}
+
+					if(W.TheStandMode)
+					{
+						if(arena.theWorldTime.containsKey(player))
+						{
+							arena.theWorldTime.put(player, 0.0f);
+						}
+					}
 				}
 			}
 		}
